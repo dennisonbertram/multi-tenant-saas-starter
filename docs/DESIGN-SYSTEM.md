@@ -27,6 +27,7 @@ Radix primitives + Tailwind CSS v4 tokens (globals.css)
 
 | Component | Purpose | Notes |
 |-----------|---------|-------|
+| `SidebarProvider`, `Sidebar`, `SidebarHeader/Content/Footer`, `SidebarGroup*`, `SidebarMenu*`, `SidebarInset`, `SidebarTrigger` | Two-column app shell | Composed in `src/app/(app)/app-sidebar.tsx`; collapses to a sheet on mobile |
 | `Button` | Actions in forms | `variant`: `primary` / `secondary` / `danger`; `size`: `xs`/`sm`/`default`/`lg` |
 | `ButtonLink` | Navigations that look like buttons | Same variants; renders `<a>` |
 | `ConfirmSubmit` | Two-step guard for destructive submits | `src/components/confirm-button.tsx`; arms to "Confirm delete?" |
@@ -43,8 +44,10 @@ Radix primitives + Tailwind CSS v4 tokens (globals.css)
 
 - Tokens live in `src/app/globals.css` (shadcn Tailwind v4 format:
   `@theme inline` + oklch variables, light + `.dark`).
-- Brand: `--primary` is set to blue (`oklch(0.55 0.22 262)` light,
-  `oklch(0.65 0.2 262)` dark). Change it there to rebrand the whole app.
+- Grays are shadcn's **gray** base palette (subtle cool-gray, hue ~264);
+  brand `--primary` is overridden to blue (`oklch(0.55 0.22 262)` light,
+  `oklch(0.65 0.2 262)` dark), mirrored on `--sidebar-primary`. Change those
+  two variables to rebrand the whole app.
 - Use Tailwind utilities that reference theme tokens (`bg-primary`,
   `text-muted-foreground`, `border-border`, `text-destructive`) — never
   hardcode hex values or raw `var(--…)` in pages.

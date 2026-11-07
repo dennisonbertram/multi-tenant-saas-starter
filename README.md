@@ -82,8 +82,10 @@ dev server console; copy the link from there.
 ### Design system (`src/components/ui.tsx`, `docs/DESIGN-SYSTEM.md`)
 - Built on **shadcn/ui** (Radix primitives + Tailwind v4 tokens), with a thin
   facade keeping a stable project API: `Button`, `ButtonLink`,
-  `ConfirmSubmit`, `Input`, `Select`, `Field`, `Alert`, `Card`, `Table`.
-- Brand colors live in `globals.css` (`--primary` is blue by default).
+  `ConfirmSubmit`, `Input`, `Select`, `Field`, `Alert`, `Card`, `Table`,
+  `Sidebar` (two-column app shell with mobile sheet).
+- Tokens use shadcn's **gray** base palette; brand `--primary` is blue by
+  default (two variables in `globals.css` to rebrand).
 - **Project rule** (`/AGENTS.md`): never build ad-hoc components — use the
   facade / shadcn primitives, so the UI stays consistent as the app grows.
 
