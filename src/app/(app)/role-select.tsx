@@ -35,6 +35,7 @@ export function RoleSelect({
     >
       <input type="hidden" name="membershipId" value={membershipId} />
       <select
+        key={role}
         name="role"
         defaultValue={role}
         disabled={pending}

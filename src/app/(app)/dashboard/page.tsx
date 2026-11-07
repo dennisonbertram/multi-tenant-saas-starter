@@ -35,7 +35,7 @@ export default async function DashboardPage({
           )}
           <Link
             href="/projects"
-            className="mt-3 inline-flex items-center justify-center rounded-md bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
+            className="mt-3 inline-flex items-center justify-center rounded-md bg-[var(--primary)] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
           >
             Create your first project
           </Link>
