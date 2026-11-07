@@ -33,3 +33,15 @@ Section: app shell (sidebar). Reviewed post-migration; no prior UX pass.
 - Rejected: org-switcher label (clutter), user-footer dropdown (no gain),
   create-org in sidebar (exists on /settings; members shouldn't self-serve).
 - Deferred to later rounds: dashboard redundant org-name header (R2).
+
+## Round 7 — Dashboard (2025-XX-XX)
+Section: dashboard. Reviewed post-shadcn/post-sidebar.
+- **Fixed — triple redundancy:** page-level "Acme Holdings" h1 + "Signed in
+  as …" removed (org name already in sidebar switcher + inset header; email
+  in sidebar footer). Verified gone from DOM.
+- **Added — org stats row:** three StatCard tiles (Active projects, Members,
+  Pending invites) using org-scoped count() queries; invite tile admin-only
+  (members must not see invite volume). StatCard added to the design system
+  (ui.tsx) per the extend-first rule. Tiles link to their sections.
+- **Fixed — project rows:** now show created date (right-aligned, muted).
+- Screenshots: r2-before-dashboard.png / r2-after-dashboard.png.

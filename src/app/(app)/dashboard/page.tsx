@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { and, desc, eq } from "drizzle-orm";
+import { and, count, desc, eq, gt, isNull } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { projects } from "@/lib/db/schema";
+import { invitations, memberships, projects } from "@/lib/db/schema";
 import { requireOrg } from "@/lib/tenancy";
-import { ButtonLink, Card } from "@/components/ui";
+import { ButtonLink, Card, StatCard } from "@/components/ui";
 
 export const metadata = { title: "Dashboard" };
 
@@ -15,13 +15,43 @@ export default async function DashboardPage({
   const { user, org } = await requireOrg();
   const params = await searchParams;
 
-  // Example tenant-scoped query: always filtered by the verified org id.
+  // Example tenant-scoped queries: always filtered by the verified org id.
   const recentProjects = await db
     .select()
     .from(projects)
     .where(and(eq(projects.organizationId, org.id), eq(projects.archived, false)))
     .orderBy(desc(projects.createdAt))
     .limit(5);
+
+  const [projectCount] = await db
+    .select({ value: count() })
+    .from(projects)
+    .where(and(eq(projects.organizationId, org.id), eq(projects.archived, false)));
+  const [memberCount] = await db
+    .select({ value: count() })
+    .from(memberships)
+    .where(eq(memberships.organizationId, org.id));
+
+  // Pending invites are an admin concern — members don't get this tile.
+  const isAdmin = org.role !== "member";
+  let pendingInvites = 0;
+  if (isAdmin) {
+    const [inviteCount] = await db
+      .select({ value: count() })
+      .from(invitations)
+      .where(
+        and(
+          eq(invitations.organizationId, org.id),
+          isNull(invitations.acceptedAt),
+          isNull(invitations.revokedAt),
+          gt(invitations.expiresAt, new Date()),
+        ),
+      );
+    pendingInvites = inviteCount.value;
+  }
+
+  const fmtDate = (d: Date) =>
+    d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
   return (
     <div className="space-y-6">
@@ -42,9 +72,16 @@ export default async function DashboardPage({
         </Card>
       ) : null}
 
-      <div>
-        <h1 className="text-2xl font-semibold">{org.name}</h1>
-        <p className="text-sm text-muted-foreground">Signed in as {user.email}</p>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <StatCard label="Active projects" value={projectCount.value} href="/projects" />
+        <StatCard label="Members" value={memberCount.value} href="/members" />
+        {isAdmin ? (
+          <StatCard
+            label="Pending invites"
+            value={pendingInvites}
+            href={pendingInvites > 0 ? "/members" : undefined}
+          />
+        ) : null}
       </div>
 
       <Card
@@ -62,8 +99,9 @@ export default async function DashboardPage({
         ) : (
           <ul className="divide-y divide-border">
             {recentProjects.map((p) => (
-              <li key={p.id} className="py-2 text-sm">
-                {p.name}
+              <li key={p.id} className="flex items-center justify-between py-2 text-sm">
+                <span>{p.name}</span>
+                <span className="text-xs text-muted-foreground">{fmtDate(p.createdAt)}</span>
               </li>
             ))}
           </ul>

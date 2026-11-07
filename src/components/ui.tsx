@@ -170,6 +170,32 @@ export function Card({
   );
 }
 
+// ── Stat tile ── dashboard summary numbers ──────────────────────────────────
+
+export function StatCard({
+  label,
+  value,
+  href,
+}: {
+  label: string;
+  value: string | number;
+  href?: string;
+}) {
+  const body = (
+    <div className="rounded-lg border bg-card p-4">
+      <p className="text-sm text-muted-foreground">{label}</p>
+      <p className="mt-1 text-2xl font-semibold tabular-nums">{value}</p>
+    </div>
+  );
+  return href ? (
+    <a href={href} className="block transition-colors hover:border-ring/40">
+      {body}
+    </a>
+  ) : (
+    body
+  );
+}
+
 // ── Tables ──────────────────────────────────────────────────────────────────
 
 export {
