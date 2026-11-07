@@ -45,3 +45,14 @@ Section: dashboard. Reviewed post-shadcn/post-sidebar.
   (ui.tsx) per the extend-first rule. Tiles link to their sections.
 - **Fixed — project rows:** now show created date (right-aligned, muted).
 - Screenshots: r2-before-dashboard.png / r2-after-dashboard.png.
+
+## Round 8 — Projects (2025-XX-XX)
+- **Fixed — archived rows leaked into the list:** the page selected all
+  projects while the dashboard filters archived=false; archived rows showed
+  unlabeled and identical to active ones. List now filters archived.
+  Regression-proven: archived a project via SQL → gone from the list.
+- **Fixed — inconsistent row metadata:** project rows now show created
+  dates (matches dashboard rows).
+- **Fixed — form-first always:** create card now renders after the list
+  when projects exist, before it when empty (onboarding preserved).
+  Verified both orders live.
