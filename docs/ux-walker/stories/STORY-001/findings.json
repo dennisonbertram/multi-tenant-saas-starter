@@ -1,0 +1,3 @@
+[
+ {"id":"F-001-001","story_id":"STORY-001","severity":"critical","category":"error-handling","criterion":"signup must not fail on missing optional integration","score":"fail","description":"Production build without SMTP configured crashed the signup server action (ECONNREFUSED 587) after the user row was committed — user stranded on an error page.","expected":"Signup completes; email logged to console with a warning.","actual":"500 server-side exception on submit.","screenshot":"shots/STORY-001/step-3-dashboard.png","suggested_fix":"emailDevMode = !env.SMTP_HOST (env-independent fallback)","files_likely_involved":["src/lib/env.ts"],"fixed":"yes — commit 11ee0d0, issue docs/ux-walker/issues/F-001-001.md"}
+]

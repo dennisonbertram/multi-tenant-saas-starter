@@ -1,0 +1,2 @@
+# STORY-021 — admin removes a member
+Owner removed dana (member) from Acme Holdings → row gone immediately; access revoked. Follow-up discovered a critical edge: the removed user (only org) could not reach any page after login — requireOrg bounced them to /login, an invisible lockout. Fixed with a /no-org landing page (create-organization form); verified: removed user signs in → /no-org → creates org → dashboard. Screenshots: shots/STORY-021/*.

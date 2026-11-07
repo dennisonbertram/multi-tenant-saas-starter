@@ -1,0 +1,3 @@
+[
+ {"id":"F-002-001","story_id":"STORY-002","severity":"low","category":"hierarchy","criterion":"one clear primary action; nothing said twice","score":"warn","description":"Dashboard states email verification twice (banner + welcome card) and the org name three times (header, welcome body, h1). No visually primary action on the screen.","expected":"Single canonical mention per fact; one dominant next step.","actual":"Repeated info; all text-weight, no primary CTA.","screenshot":"shots/STORY-002/dashboard.png","suggested_fix":"Drop the verification sentence from the welcome card while the banner is shown; keep banner as canonical.","files_likely_involved":["src/app/(app)/dashboard/page.tsx"]}
+]

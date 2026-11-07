@@ -24,3 +24,7 @@ npm-debug.log*
 # local database (docker-compose dev volume)
 .pgdata/
 backups/
+
+# ux-walker runtime artifacts
+docs/ux-walker/dev.log
+docs/ux-walker/dev.pid

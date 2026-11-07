@@ -1,0 +1,3 @@
+# STORY-018 — invite a teammate and accept via emailed link
+Owner invited dana@acme.test (member role) → "Invitation sent" + pending row; invite email logged server-side. Invitee (logged out) opened /accept-invite?token=… → "Join Acme Holdings" card, email locked read-only, name+password form → joined, signed in, landed in the org dashboard. Screenshots: shots/STORY-018/*. Flow log: ideal 4 (inviter) + 3 (invitee), actual matched. No findings.
+Note: the walkthrough used the temp@acme.test invite for acceptance after STORY-019 accidentally revoked the first one (see F-019-001) — the flow itself was fully exercised.
