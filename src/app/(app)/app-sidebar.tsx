@@ -21,6 +21,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarRail,
 } from "@/components/ui";
 import { OrgSwitchSelect } from "./org-switch-select";
 import { logoutAction } from "../(auth)/actions";
@@ -56,6 +57,9 @@ export function AppSidebar({
 }) {
   const pathname = usePathname();
   const isAdmin = org.role !== "member";
+
+  // Exact match: /settings must not also light up on /settings/account.
+  const isActive = (href: string) => pathname === href;
 
   return (
     <Sidebar>
@@ -94,7 +98,7 @@ export function AppSidebar({
             <SidebarMenu>
               {NAV_ITEMS.map((item) => (
                 <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton asChild isActive={pathname.startsWith(item.href)}>
+                  <SidebarMenuButton asChild isActive={isActive(item.href)}>
                     <Link href={item.href}>
                       <item.icon />
                       <span>{item.label}</span>
@@ -113,7 +117,7 @@ export function AppSidebar({
               <SidebarMenu>
                 {ADMIN_ITEMS.map((item) => (
                   <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton asChild isActive={pathname.startsWith(item.href)}>
+                    <SidebarMenuButton asChild isActive={isActive(item.href)}>
                       <Link href={item.href}>
                         <item.icon />
                         <span>{item.label}</span>
@@ -130,7 +134,7 @@ export function AppSidebar({
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={pathname.startsWith("/settings/account")}>
+                <SidebarMenuButton asChild isActive={isActive("/settings/account")}>
                   <Link href="/settings/account">
                     <User />
                     <span>Account</span>
@@ -159,6 +163,7 @@ export function AppSidebar({
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
+      <SidebarRail />
     </Sidebar>
   );
 }

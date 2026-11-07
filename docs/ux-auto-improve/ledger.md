@@ -22,3 +22,14 @@ Deferred proposals and new user stories are recorded per round in docs/ux-auto-i
 | P2 | RoleSelect defaultValue goes stale after role change | real | `key={role}` remounts select with current role |
 | P2 | `--accent` CSS variable undefined → new CTAs invisible (transparent bg + white text) | real | replaced with `--primary`; computed bg verified rgb(37,99,235) |
 | — | server actions, tenancy, Retry-After | clean | — |
+
+## Round 6 — Sidebar shell + navigation (2025-XX-XX, shadcn era)
+Section: app shell (sidebar). Reviewed post-migration; no prior UX pass.
+- **Fixed — double highlight:** /settings/account lit up both "Settings" and
+  "Account" (startsWith overlap). Active state now exact-match
+  (`app-sidebar.tsx`). Verified: /settings/account → ["Account"] only.
+- **Fixed — no collapse affordance:** added `<SidebarRail />` (edge
+  click-to-collapse on desktop).
+- Rejected: org-switcher label (clutter), user-footer dropdown (no gain),
+  create-org in sidebar (exists on /settings; members shouldn't self-serve).
+- Deferred to later rounds: dashboard redundant org-name header (R2).
