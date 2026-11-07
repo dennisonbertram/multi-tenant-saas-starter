@@ -36,7 +36,10 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   if (!rateLimit(`api-projects:${clientIp(req.headers)}`, { limit: 30, windowMs: 60_000 }).ok) {
-    return Response.json({ error: "Too many requests" }, { status: 429 });
+    return Response.json(
+      { error: "Too many requests" },
+      { status: 429, headers: { "Retry-After": "60" } },
+    );
   }
 
   const auth = await requireOrgApi(req, "member");
