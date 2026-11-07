@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireOrg, listUserOrganizations } from "@/lib/tenancy";
 import { logoutAction } from "../(auth)/actions";
 import { switchOrgAction } from "./actions";
+import { OrgSwitchSelect } from "./org-switch-select";
 import { VerifyEmailBanner } from "./verify-banner";
 import { Button } from "@/components/ui";
 
@@ -40,22 +41,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
           <div className="ml-auto flex items-center gap-3">
             {orgs.length > 1 ? (
-              <form action={switchOrgAction}>
-                <select
-                  name="organizationId"
-                  defaultValue={org.id}
-                  className="rounded-md border border-[var(--border)] bg-white px-2 py-1.5 text-sm"
-                >
-                  {orgs.map((o) => (
-                    <option key={o.id} value={o.id}>
-                      {o.name}
-                    </option>
-                  ))}
-                </select>
-                <Button variant="secondary" className="ml-1 px-2 py-1.5 text-xs">
-                  Switch
-                </Button>
-              </form>
+              <OrgSwitchSelect organizations={orgs} currentOrgId={org.id} action={switchOrgAction} />
             ) : (
               <span className="text-sm font-medium text-[var(--muted)]">{org.name}</span>
             )}
