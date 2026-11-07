@@ -16,10 +16,11 @@ import { authTokens } from "@/lib/db/schema";
  *   the same type when issuing a new one.
  */
 
-export type TokenType = "email_verify" | "password_reset" | "invite";
+export type TokenType = "email_verify" | "email_change" | "password_reset" | "invite";
 
 const TTL_MS: Record<TokenType, number> = {
   email_verify: 24 * 60 * 60 * 1000, // 24h
+  email_change: 24 * 60 * 60 * 1000, // 24h
   password_reset: 60 * 60 * 1000, // 1h
   invite: 7 * 24 * 60 * 60 * 1000, // 7d
 };

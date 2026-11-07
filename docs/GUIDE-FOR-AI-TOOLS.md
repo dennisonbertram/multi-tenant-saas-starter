@@ -4,6 +4,11 @@ Paste this file (or link it) when you use a coding assistant — Claude,
 Cursor, Aider, Copilot Workspace, etc. — to build on this codebase. It gives
 the tool the rules that keep the starter secure as it grows.
 
+> **Agents**: see also `/AGENTS.md` (root) — the short, hard-rule version of
+> this guide, including the design-system rule
+> (`docs/DESIGN-SYSTEM.md`): never build ad-hoc UI components, always use
+> the primitives in `src/components/ui.tsx`.
+
 ## Project intent
 
 Multi-tenant SaaS starter, fully self-hosted, **no third-party platform

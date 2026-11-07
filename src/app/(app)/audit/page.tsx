@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { requireRole } from "@/lib/tenancy";
-import { listAuditEvents } from "../actions";
-import { Card } from "@/components/ui";
+import { listAuditEvents } from "@/lib/audit-queries";
+import { Card, Table, Td, Th } from "@/components/ui";
 
 export const metadata = { title: "Audit log" };
 
@@ -32,33 +32,31 @@ export default async function AuditPage({
         {rows.length === 0 ? (
           <p className="text-sm text-[var(--muted)]">No events recorded yet.</p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left text-xs text-[var(--muted)]">
-                  <th className="py-2 pr-4 font-medium">When (UTC)</th>
-                  <th className="py-2 pr-4 font-medium">Actor</th>
-                  <th className="py-2 pr-4 font-medium">Action</th>
-                  <th className="py-2 font-medium">Details</th>
+          <Table>
+            <thead>
+              <tr>
+                <Th>When (UTC)</Th>
+                <Th>Actor</Th>
+                <Th>Action</Th>
+                <Th>Details</Th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-[var(--border)]">
+              {rows.map((e) => (
+                <tr key={e.id}>
+                  <Td className="whitespace-nowrap text-[var(--muted)]">
+                    {formatWhen(e.createdAt)}
+                  </Td>
+                  <Td>{e.actorEmail ?? "—"}</Td>
+                  <Td className="font-mono">{e.action}</Td>
+                  <Td className="text-[var(--muted)]">
+                    {e.metadata ? JSON.stringify(e.metadata) : "—"}
+                    {e.ipAddress ? ` · ${e.ipAddress}` : ""}
+                  </Td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--border)]">
-                {rows.map((e) => (
-                  <tr key={e.id} className="align-top">
-                    <td className="whitespace-nowrap py-2 pr-4 text-xs text-[var(--muted)]">
-                      {formatWhen(e.createdAt)}
-                    </td>
-                    <td className="py-2 pr-4 text-xs">{e.actorEmail ?? "—"}</td>
-                    <td className="py-2 pr-4 font-mono text-xs">{e.action}</td>
-                    <td className="py-2 text-xs text-[var(--muted)]">
-                      {e.metadata ? JSON.stringify(e.metadata) : "—"}
-                      {e.ipAddress ? ` · ${e.ipAddress}` : ""}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </Table>
         )}
       </Card>
 

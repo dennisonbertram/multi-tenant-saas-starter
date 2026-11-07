@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth/session";
+import { ButtonLink } from "@/components/ui";
 
 export default async function LandingPage() {
   const user = await getCurrentUser();
@@ -23,18 +24,10 @@ export default async function LandingPage() {
           </Link>
         ) : (
           <>
-            <Link
-              href="/signup"
-              className="rounded-md bg-[var(--primary)] px-5 py-2.5 text-sm font-medium text-white hover:bg-[var(--primary-hover)]"
-            >
-              Create an account
-            </Link>
-            <Link
-              href="/login"
-              className="rounded-md border border-[var(--border)] bg-white px-5 py-2.5 text-sm font-medium hover:bg-slate-50"
-            >
+            <ButtonLink href="/signup">Create an account</ButtonLink>
+            <ButtonLink href="/login" variant="secondary">
               Sign in
-            </Link>
+            </ButtonLink>
           </>
         )}
       </div>

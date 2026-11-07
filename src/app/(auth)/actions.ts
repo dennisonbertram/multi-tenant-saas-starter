@@ -179,27 +179,31 @@ export async function resetPasswordAction(_prev: FormState, formData: FormData):
 
 /** Called from the verify-email page (token arrives via email link). */
 export async function verifyEmailToken(token: string): Promise<{ ok: boolean }> {
-  const claimed = await claimAuthToken(token, "email_verify");
-  if (!claimed) return { ok: false };
-
-  // If the user requested an email change, claiming the link sent to the NEW
-  // address is what makes the change take effect (and marks it verified).
-  const [row] = await db
-    .select({ pendingEmail: users.pendingEmail })
-    .from(users)
-    .where(eq(users.id, claimed.userId))
-    .limit(1);
-
-  if (row?.pendingEmail) {
+  // Two purposes share this page, with DISTINCT token types so a link is
+  // bound to its purpose: "email_verify" (sent to the current address) only
+  // flips emailVerifiedAt; "email_change" (sent ONLY to the new address) is
+  // what applies a pending change. A "resend verification" link for the old
+  // mailbox can therefore never approve a change to a different one.
+  const change = await claimAuthToken(token, "email_change");
+  if (change) {
+    const [row] = await db
+      .select({ pendingEmail: users.pendingEmail })
+      .from(users)
+      .where(eq(users.id, change.userId))
+      .limit(1);
+    if (!row?.pendingEmail) return { ok: false }; // change cancelled/overwritten since issue
     await db
       .update(users)
       .set({ email: row.pendingEmail, pendingEmail: null, emailVerifiedAt: new Date(), updatedAt: new Date() })
-      .where(eq(users.id, claimed.userId));
-    await audit({ userId: claimed.userId, action: "account.email_changed", metadata: { newEmail: row.pendingEmail } });
-  } else {
-    await db.update(users).set({ emailVerifiedAt: new Date() }).where(eq(users.id, claimed.userId));
-    await audit({ userId: claimed.userId, action: "user.email_verified" });
+      .where(eq(users.id, change.userId));
+    await audit({ userId: change.userId, action: "account.email_changed", metadata: { newEmail: row.pendingEmail } });
+    return { ok: true };
   }
+
+  const claimed = await claimAuthToken(token, "email_verify");
+  if (!claimed) return { ok: false };
+  await db.update(users).set({ emailVerifiedAt: new Date() }).where(eq(users.id, claimed.userId));
+  await audit({ userId: claimed.userId, action: "user.email_verified" });
   return { ok: true };
 }
 

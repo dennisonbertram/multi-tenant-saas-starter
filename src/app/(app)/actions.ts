@@ -366,8 +366,8 @@ export async function requestEmailChangeAction(_prev: FormState, formData: FormD
   }
 
   await db.update(users).set({ pendingEmail: parsed.data.newEmail }).where(eq(users.id, user.id));
-  await revokeAuthTokens(user.id, "email_verify");
-  const token = await createAuthToken(user.id, "email_verify");
+  await revokeAuthTokens(user.id, "email_change");
+  const token = await createAuthToken(user.id, "email_change");
   await sendVerificationEmail(
     parsed.data.newEmail,
     user.name,
@@ -383,29 +383,9 @@ export async function requestEmailChangeAction(_prev: FormState, formData: FormD
   return { success: `Verification link sent to ${parsed.data.newEmail}. The change takes effect once you open it.` };
 }
 
-// ── Audit log viewer (issue #4) ─────────────────────────────────────────────
-
-/** Read model for /audit — org-scoped, newest first. Never used for authz. */
-export async function listAuditEvents(orgId: string, page: number) {
-  const pageSize = 50;
-  return db
-    .select({
-      id: auditLog.id,
-      action: auditLog.action,
-      metadata: auditLog.metadata,
-      ipAddress: auditLog.ipAddress,
-      createdAt: auditLog.createdAt,
-      actorEmail: users.email,
-      actorName: users.name,
-    })
-    .from(auditLog)
-    .leftJoin(users, eq(users.id, auditLog.userId))
-    .where(eq(auditLog.organizationId, orgId))
-    .orderBy(desc(auditLog.createdAt))
-    .limit(pageSize + 1)
-    .offset((page - 1) * pageSize)
-    .then((rows) => ({ rows: rows.slice(0, pageSize), hasMore: rows.length > pageSize }));
-}
+// ── Audit log viewer (issue #4) ── moved to src/lib/audit-queries.ts ──────
+// (a "use server" file exports every function as a callable action; the
+// audit read model must only run behind the page's requireRole guard)
 
 // ── Invitation re-send (issue #5) ───────────────────────────────────────────
 
@@ -418,12 +398,12 @@ export async function resendInvitationAction(formData: FormData): Promise<void> 
   const { user, org } = await requireRole("admin");
   const invitationId = formData.get("invitationId")?.toString() ?? "";
 
-  if (!rateLimit(`invite-resend:${invitationId}`, { limit: 1, windowMs: 60_000 }).ok) {
-    return; // at most one re-send per invitation per minute
-  }
-
+  // Look the invitation up FIRST: Postgres canonicalizes the UUID (case,
+  // braces, hyphen variants all match), so the rate limit below keys on the
+  // canonical id — equivalent-but-different spellings cannot mint separate
+  // limit buckets.
   const [invitation] = await db
-    .select({ email: invitations.email, role: invitations.role, expiresAt: invitations.expiresAt })
+    .select({ id: invitations.id, email: invitations.email, role: invitations.role, expiresAt: invitations.expiresAt })
     .from(invitations)
     .where(
       and(
@@ -435,11 +415,15 @@ export async function resendInvitationAction(formData: FormData): Promise<void> 
     .limit(1);
   if (!invitation) return;
 
+  if (!rateLimit(`invite-resend:${invitation.id}`, { limit: 1, windowMs: 60_000 }).ok) {
+    return; // at most one re-send per invitation per minute
+  }
+
   const raw = await createAuthToken(user.id, "invite");
   await db
     .update(invitations)
     .set({ tokenHash: hashToken(raw) })
-    .where(and(eq(invitations.id, invitationId), eq(invitations.organizationId, org.id)));
+    .where(and(eq(invitations.id, invitation.id), eq(invitations.organizationId, org.id)));
 
   await sendInviteEmail(invitation.email, org.name, user.name ?? user.email, `${env.APP_URL}/accept-invite?token=${raw}`);
   await audit({

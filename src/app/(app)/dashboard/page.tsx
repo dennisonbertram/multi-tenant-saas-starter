@@ -3,7 +3,7 @@ import { and, desc, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { projects } from "@/lib/db/schema";
 import { requireOrg } from "@/lib/tenancy";
-import { Card } from "@/components/ui";
+import { ButtonLink, Card } from "@/components/ui";
 
 export const metadata = { title: "Dashboard" };
 
@@ -33,12 +33,7 @@ export default async function DashboardPage({
               experience.
             </p>
           )}
-          <Link
-            href="/projects"
-            className="mt-3 inline-flex items-center justify-center rounded-md bg-[var(--primary)] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
-          >
-            Create your first project
-          </Link>
+          <ButtonLink href="/projects">Create your first project</ButtonLink>
         </Card>
       ) : null}
       {params.error === "forbidden" ? (

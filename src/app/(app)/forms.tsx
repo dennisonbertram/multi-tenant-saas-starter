@@ -11,7 +11,7 @@ import {
   updateOrgAction,
 } from "./actions";
 import type { FormState } from "../(auth)/actions";
-import { Alert, Button, Field, Input } from "@/components/ui";
+import { Alert, Button, Field, Input, Select } from "@/components/ui";
 
 const initial: FormState = {};
 
@@ -43,13 +43,10 @@ export function InviteMemberForm({ canInviteAdmins }: { canInviteAdmins: boolean
         <Input name="email" type="email" required />
       </Field>
       <Field label="Role" error={state.fieldErrors?.role}>
-        <select
-          name="role"
-          className="w-full rounded-md border border-[var(--border)] bg-white px-3 py-2 text-sm"
-        >
+        <Select name="role" defaultValue="member">
           <option value="member">Member</option>
           {canInviteAdmins ? <option value="admin">Admin</option> : null}
-        </select>
+        </Select>
       </Field>
       <Button type="submit" disabled={pending}>
         {pending ? "Sending…" : "Send invitation"}
