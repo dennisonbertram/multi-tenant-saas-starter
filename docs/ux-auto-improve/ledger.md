@@ -76,3 +76,13 @@ Section: dashboard. Reviewed post-shadcn/post-sidebar.
 - Reviewed and kept as-is: anti-enumeration on forgot-password (generic
   response), pending states on all submit buttons, autocomplete attrs,
   autoFocus on email — all already correct.
+
+## Round 11 — Settings + Account (2025-XX-XX)
+- **Fixed — no-op saves:** "Save name" (account) and "Save" (org rename)
+  could be clicked with unchanged values, producing pointless audit entries
+  and success toasts. Both forms now disable submit until dirty; verified
+  disabled → edit → enabled → undo → disabled on both.
+- **Fixed — focus steal:** CreateOrgForm's autoFocus ran on /settings even
+  though rename sits above it. autoFocus is now a prop; only the no-org
+  page (where the form is the sole content) passes it.
+- Deferred: delete-organization danger zone → R8 (org lifecycle).

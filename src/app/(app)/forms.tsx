@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import {
   changePasswordAction,
   createOrgAction,
@@ -73,27 +73,35 @@ export function InviteMemberForm({ canInviteAdmins }: { canInviteAdmins: boolean
 
 export function RenameOrgForm({ name }: { name: string }) {
   const [state, formAction, pending] = useActionState(updateOrgAction, initial);
+  const [value, setValue] = useState(name);
+  const dirty = value !== name;
   return (
     <form action={formAction} className="space-y-3">
       {state.success ? <Alert kind="success">{state.success}</Alert> : null}
       {state.error ? <Alert kind="error">{state.error}</Alert> : null}
       <Field label="Organization name" error={state.fieldErrors?.name}>
-        <Input name="name" defaultValue={name} required maxLength={100} />
+        <Input
+          name="name"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          required
+          maxLength={100}
+        />
       </Field>
-      <Button type="submit" disabled={pending}>
+      <Button type="submit" disabled={pending || !dirty}>
         {pending ? "Saving…" : "Save"}
       </Button>
     </form>
   );
 }
 
-export function CreateOrgForm() {
+export function CreateOrgForm({ autoFocus = false }: { autoFocus?: boolean }) {
   const [state, formAction, pending] = useActionState(createOrgAction, initial);
   return (
     <form action={formAction} className="space-y-3">
       {state.error ? <Alert kind="error">{state.error}</Alert> : null}
       <Field label="Organization name" error={state.fieldErrors?.name}>
-        <Input name="name" required maxLength={100} autoFocus />
+        <Input name="name" required maxLength={100} autoFocus={autoFocus} />
       </Field>
       <Button type="submit" disabled={pending}>
         {pending ? "Creating…" : "Create organization"}
@@ -104,14 +112,23 @@ export function CreateOrgForm() {
 
 export function UpdateNameForm({ name }: { name: string | null }) {
   const [state, formAction, pending] = useActionState(updateNameAction, initial);
+  const original = name ?? "";
+  const [value, setValue] = useState(original);
+  const dirty = value !== original;
   return (
     <form action={formAction} className="space-y-3">
       {state.success ? <Alert kind="success">{state.success}</Alert> : null}
       {state.error ? <Alert kind="error">{state.error}</Alert> : null}
       <Field label="Display name" error={state.fieldErrors?.name}>
-        <Input name="name" defaultValue={name ?? ""} required maxLength={100} />
+        <Input
+          name="name"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          required
+          maxLength={100}
+        />
       </Field>
-      <Button type="submit" disabled={pending}>
+      <Button type="submit" disabled={pending || !dirty}>
         {pending ? "Saving…" : "Save name"}
       </Button>
     </form>

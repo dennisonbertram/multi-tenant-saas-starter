@@ -24,7 +24,7 @@ export default async function NoOrgPage() {
         title="You're not in any organization"
         description="Create one to start working — you'll be its owner."
       >
-        <CreateOrgForm />
+        <CreateOrgForm autoFocus />
       </Card>
     </main>
   );
