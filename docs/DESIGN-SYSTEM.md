@@ -1,46 +1,59 @@
 # Design system
 
-One place for every UI primitive: **`src/components/ui.tsx`**. Dependency-free
-by design (no component library) — the value is that every button, input and
-table in the app shares one accessible, consistent implementation.
+Built on **[shadcn/ui](https://ui.shadcn.com)** (Radix primitives + Tailwind
+CSS v4), with a thin project facade in **`src/components/ui.tsx`**.
 
 ## The rule
 
 **Never build ad-hoc components. Never hand-roll Tailwind for an interactive
-element.** If `ui.tsx` lacks what you need, extend `ui.tsx` first, then use it.
-This is a hard project rule (see `/AGENTS.md`).
+element.** Pages import from `@/components/ui` (the facade) — if something is
+missing, either add the shadcn component (`npx shadcn@latest add <name>`) and
+re-export it through `ui.tsx`, or extend the facade. This is a hard project
+rule (see `/AGENTS.md`).
 
-## Components
+## How it's layered
+
+```
+pages / feature components
+        ↓ import only this
+src/components/ui.tsx        ← the facade (project API: variants, Card props, Alert kinds)
+        ↓ wraps
+src/components/ui/*.tsx      ← shadcn/ui primitives (committed source, editable)
+        ↓ built on
+Radix primitives + Tailwind CSS v4 tokens (globals.css)
+```
+
+## Facade API
 
 | Component | Purpose | Notes |
 |-----------|---------|-------|
-| `Button` | Actions in forms | `variant`: `primary` / `secondary` / `danger` |
-| `ButtonLink` | Navigations that must look like buttons | Same variants; renders `<a>` |
-| `ConfirmSubmit` | Two-step guard for destructive submits | Client component in `src/components/confirm-button.tsx`; arms to "Confirm delete?" |
-| `Input` | Text/email/password inputs | Full-width, consistent focus ring |
-| `Select` | Dropdowns | Full-width by default; `!w-auto` for inline uses |
-| `Field` | Label + control + inline error | Wraps Input/Select |
-| `ErrorText` | Inline error outside a `Field` | Same styling as Field errors |
+| `Button` | Actions in forms | `variant`: `primary` / `secondary` / `danger`; `size`: `xs`/`sm`/`default`/`lg` |
+| `ButtonLink` | Navigations that look like buttons | Same variants; renders `<a>` |
+| `ConfirmSubmit` | Two-step guard for destructive submits | `src/components/confirm-button.tsx`; arms to "Confirm delete?" |
+| `Input` | Text/email/password inputs | Re-export of shadcn Input |
+| `Select` + `SelectTrigger`/`SelectValue`/`SelectContent`/`SelectItem` | Dropdowns (Radix) | Use `name` prop for form submission; `onValueChange` + `requestSubmit()` for auto-submit patterns |
+| `Field` | Label + control + inline error | Uses shadcn `Label` |
+| `ErrorText` | Inline error outside a `Field` | |
 | `Alert` | Feedback messages | `kind`: `info` / `error` / `success` |
-| `Card` | Page sections | Optional `title` / `description` |
-| `Muted` | Supporting/hint text | `text-[var(--muted)]` |
-| `Table` / `Th` / `Td` | Data tables | Used by `/audit`; add wrappers here, not per-page |
+| `Card` | Page sections | Our `title`/`description` props over shadcn's compound Card |
+| `Muted` | Supporting/hint text | `text-muted-foreground` |
+| `Table`, `TableHeader`, `TableBody`, `TableRow`, `TableHead`, `TableCell` | Data tables | Re-exports of shadcn table |
 
-## Building blocks
+## Theming
 
-- **`buttonStyles(variant)`** — the single source of truth for button visuals.
-  `Button`, `ButtonLink` and `ConfirmSubmit` all consume it, so the three can
-  never drift apart. Use it directly only for rare state-dependent buttons.
-- **CSS variables** (in `src/app/globals.css`): `--primary`, `--primary-hover`,
-  `--danger`, `--border`, `--card`, `--muted`, `--foreground`. Never hardcode
-  hex values in components; if you need a new token, add it to `globals.css`.
+- Tokens live in `src/app/globals.css` (shadcn Tailwind v4 format:
+  `@theme inline` + oklch variables, light + `.dark`).
+- Brand: `--primary` is set to blue (`oklch(0.55 0.22 262)` light,
+  `oklch(0.65 0.2 262)` dark). Change it there to rebrand the whole app.
+- Use Tailwind utilities that reference theme tokens (`bg-primary`,
+  `text-muted-foreground`, `border-border`, `text-destructive`) — never
+  hardcode hex values or raw `var(--…)` in pages.
 
-## Patterns
+## Adding more shadcn components
 
-- **Forms**: server action + `useActionState` in a client component
-  (see `src/app/(app)/forms.tsx`), `Field` + `Input`/`Select` + `Button`,
-  `Alert` for success/error feedback.
-- **Destructive actions**: wrap the submit in `ConfirmSubmit` — never a bare
-  danger button, never `window.confirm`.
-- **Owner/admin-only inline controls**: follow `role-select.tsx` (renders only
-  for authorized roles, hides on the viewer's own row).
+```bash
+npx shadcn@latest add <component>
+```
+
+Then re-export through `src/components/ui.tsx` and use the facade in pages.
+Config lives in `components.json`; the `cn` helper is in `src/lib/utils.ts`.

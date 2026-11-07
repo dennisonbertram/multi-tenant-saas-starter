@@ -29,13 +29,13 @@ export function SignupForm() {
           required
           minLength={10}
         />
-        <span className="mt-1 block text-xs text-[var(--muted)]">
+        <span className="mt-1 block text-xs text-muted-foreground">
           At least 10 characters.
         </span>
       </Field>
       <Field label="Organization name" error={state.fieldErrors?.organizationName}>
         <Input name="organizationName" required placeholder="Acme Inc." />
-        <span className="mt-1 block text-xs text-[var(--muted)]">
+        <span className="mt-1 block text-xs text-muted-foreground">
           You&apos;ll be the owner. You can create more organizations later.
         </span>
       </Field>

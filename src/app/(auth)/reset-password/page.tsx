@@ -17,10 +17,10 @@ export default async function ResetPasswordPage({
 
   return (
     <div className="space-y-4">
-      <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-6 shadow-sm">
+      <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
         <h1 className="mb-4 text-xl font-semibold">Choose a new password</h1>
         {!token ? (
-          <p className="text-sm text-[var(--muted)]">
+          <p className="text-sm text-muted-foreground">
             This link is missing its token. Request a new one from{" "}
             <Link href="/forgot-password" className="underline">
               forgot password

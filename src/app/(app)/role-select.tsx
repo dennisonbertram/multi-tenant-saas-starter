@@ -1,7 +1,14 @@
 "use client";
 
-import { useActionState } from "react";
-import { ErrorText, Select } from "@/components/ui";
+import { useActionState, useRef } from "react";
+import {
+  ErrorText,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui";
 
 type FormState = { error?: string; fieldErrors?: Record<string, string>; success?: string };
 
@@ -26,25 +33,28 @@ export function RoleSelect({
   ) => Promise<FormState>;
 }) {
   const [state, formAction, pending] = useActionState(action, {});
+  const formRef = useRef<HTMLFormElement>(null);
 
   return (
-    <form
-      action={formAction}
-      className="flex items-center gap-2"
-      onChange={(e) => e.currentTarget.requestSubmit()}
-    >
+    <form ref={formRef} action={formAction} className="flex items-center gap-2">
       <input type="hidden" name="membershipId" value={membershipId} />
+      {/* key={role} remounts the select when the saved role changes, so the
+          displayed value always matches the DB (uncontrolled defaultValue). */}
       <Select
         key={role}
         name="role"
         defaultValue={role}
         disabled={pending}
-        aria-label="Member role"
-        className="!w-auto px-2 py-1 text-xs"
+        onValueChange={() => formRef.current?.requestSubmit()}
       >
-        <option value="member">member</option>
-        <option value="admin">admin</option>
-        <option value="owner">owner</option>
+        <SelectTrigger size="sm" aria-label="Member role" className="w-auto">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="member">member</SelectItem>
+          <SelectItem value="admin">admin</SelectItem>
+          <SelectItem value="owner">owner</SelectItem>
+        </SelectContent>
       </Select>
       {state.error ? <ErrorText>{state.error}</ErrorText> : null}
     </form>

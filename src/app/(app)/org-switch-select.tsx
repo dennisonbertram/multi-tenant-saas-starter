@@ -1,10 +1,17 @@
 "use client";
 
-import { Select } from "@/components/ui";
+import { useRef } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui";
 
 /**
  * Org switcher that submits on change — removes the extra "Switch" click.
- * Keep the select keyboard-accessible (native element).
+ * Keyboard-accessible (Radix Select supports full keyboard navigation).
  */
 export function OrgSwitchSelect({
   organizations,
@@ -15,20 +22,25 @@ export function OrgSwitchSelect({
   currentOrgId: string;
   action: (formData: FormData) => void | Promise<void>;
 }) {
+  const formRef = useRef<HTMLFormElement>(null);
+
   return (
-    <form action={action}>
+    <form ref={formRef} action={action}>
       <Select
         name="organizationId"
         defaultValue={currentOrgId}
-        aria-label="Switch organization"
-        onChange={(e) => e.currentTarget.form?.requestSubmit()}
-        className="!w-auto px-2 py-1.5 text-sm"
+        onValueChange={() => formRef.current?.requestSubmit()}
       >
-        {organizations.map((o) => (
-          <option key={o.id} value={o.id}>
-            {o.name}
-          </option>
-        ))}
+        <SelectTrigger aria-label="Switch organization" className="w-auto">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {organizations.map((o) => (
+            <SelectItem key={o.id} value={o.id}>
+              {o.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
       </Select>
     </form>
   );

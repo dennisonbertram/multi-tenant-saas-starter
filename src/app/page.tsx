@@ -9,7 +9,7 @@ export default async function LandingPage() {
       <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
         Multi-tenant SaaS Starter
       </h1>
-      <p className="max-w-xl text-lg text-[var(--muted)]">
+      <p className="max-w-xl text-lg text-muted-foreground">
         A self-hosted, dependency-free starting point: built-in authentication,
         organization-based multi-tenancy, invitations, roles and an audit log —
         deployable to any server with Node and PostgreSQL.
@@ -18,7 +18,7 @@ export default async function LandingPage() {
         {user ? (
           <Link
             href="/dashboard"
-            className="rounded-md bg-[var(--primary)] px-5 py-2.5 text-sm font-medium text-white hover:bg-[var(--primary-hover)]"
+            className="rounded-md bg-primary px-5 py-2.5 text-sm font-medium text-white hover:bg-primary/90"
           >
             Go to dashboard
           </Link>

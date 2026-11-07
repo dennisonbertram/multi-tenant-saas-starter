@@ -34,15 +34,15 @@ export default async function ProjectsPage() {
 
       <Card title="All projects">
         {rows.length === 0 ? (
-          <p className="text-sm text-[var(--muted)]">Nothing here yet.</p>
+          <p className="text-sm text-muted-foreground">Nothing here yet.</p>
         ) : (
-          <ul className="divide-y divide-[var(--border)]">
+          <ul className="divide-y divide-border">
             {rows.map((p) => (
               <li key={p.id} className="flex items-center justify-between gap-4 py-3">
                 <div>
                   <p className="text-sm font-medium">{p.name}</p>
                   {p.description ? (
-                    <p className="text-xs text-[var(--muted)]">{p.description}</p>
+                    <p className="text-xs text-muted-foreground">{p.description}</p>
                   ) : null}
                 </div>
                 {org.role !== "member" ? (

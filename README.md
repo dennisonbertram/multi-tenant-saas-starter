@@ -20,7 +20,7 @@ tenant-scoped resource — not a toy, and not a pile of placeholders.
 | Auth      | Built-in (scrypt + DB-backed session cookies) | no auth vendor; see `docs/SECURITY.md` for the design |
 | Tenancy   | Organizations + memberships (shared schema)   | see `docs/MULTI-TENANCY.md` |
 | Email     | Any SMTP server (nodemailer)                  | dev mode logs emails to the console instead |
-| Styling   | Tailwind CSS v4 + a small in-house design system | no component library to fight with |
+| Styling   | Tailwind CSS v4 + shadcn/ui design system     | Radix-based accessible primitives, owned source |
 | Deploy    | Docker Compose **or** systemd + Caddy/nginx   | see `docs/DEPLOYMENT.md` |
 
 ## Quickstart (5 minutes)
@@ -80,11 +80,12 @@ dev server console; copy the link from there.
   (delete project, remove member), branded 404, forbidden-access feedback.
 
 ### Design system (`src/components/ui.tsx`, `docs/DESIGN-SYSTEM.md`)
-- Small, dependency-free primitives: `Button`, `ButtonLink`, `ConfirmSubmit`,
-  `Input`, `Select`, `Field`, `Alert`, `Card`, `Table`, and `buttonStyles()`
-  as the single source of button visuals.
-- **Project rule** (`/AGENTS.md`): never build ad-hoc components — extend the
-  design system instead, so the UI stays consistent as the app grows.
+- Built on **shadcn/ui** (Radix primitives + Tailwind v4 tokens), with a thin
+  facade keeping a stable project API: `Button`, `ButtonLink`,
+  `ConfirmSubmit`, `Input`, `Select`, `Field`, `Alert`, `Card`, `Table`.
+- Brand colors live in `globals.css` (`--primary` is blue by default).
+- **Project rule** (`/AGENTS.md`): never build ad-hoc components — use the
+  facade / shadcn primitives, so the UI stays consistent as the app grows.
 
 ### Deployment (`deploy/`, `docs/DEPLOYMENT.md`)
 - `Dockerfile` (multi-stage, standalone output) and `docker-compose.yml`

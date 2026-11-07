@@ -22,7 +22,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
           minLength={10}
           autoFocus
         />
-        <span className="mt-1 block text-xs text-[var(--muted)]">
+        <span className="mt-1 block text-xs text-muted-foreground">
           At least 10 characters. Signing you out everywhere for safety.
         </span>
       </Field>

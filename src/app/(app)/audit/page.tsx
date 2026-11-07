@@ -1,7 +1,15 @@
 import Link from "next/link";
 import { requireRole } from "@/lib/tenancy";
 import { listAuditEvents } from "@/lib/audit-queries";
-import { Card, Table, Td, Th } from "@/components/ui";
+import {
+  Card,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui";
 
 export const metadata = { title: "Audit log" };
 
@@ -30,32 +38,32 @@ export default async function AuditPage({
 
       <Card title={`Security events in ${org.name}`}>
         {rows.length === 0 ? (
-          <p className="text-sm text-[var(--muted)]">No events recorded yet.</p>
+          <p className="text-sm text-muted-foreground">No events recorded yet.</p>
         ) : (
           <Table>
-            <thead>
-              <tr>
-                <Th>When (UTC)</Th>
-                <Th>Actor</Th>
-                <Th>Action</Th>
-                <Th>Details</Th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[var(--border)]">
+            <TableHeader>
+              <TableRow>
+                <TableHead>When (UTC)</TableHead>
+                <TableHead>Actor</TableHead>
+                <TableHead>Action</TableHead>
+                <TableHead>Details</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {rows.map((e) => (
-                <tr key={e.id}>
-                  <Td className="whitespace-nowrap text-[var(--muted)]">
+                <TableRow key={e.id}>
+                  <TableCell className="whitespace-nowrap text-muted-foreground">
                     {formatWhen(e.createdAt)}
-                  </Td>
-                  <Td>{e.actorEmail ?? "—"}</Td>
-                  <Td className="font-mono">{e.action}</Td>
-                  <Td className="text-[var(--muted)]">
+                  </TableCell>
+                  <TableCell>{e.actorEmail ?? "—"}</TableCell>
+                  <TableCell className="font-mono">{e.action}</TableCell>
+                  <TableCell className="text-muted-foreground">
                     {e.metadata ? JSON.stringify(e.metadata) : "—"}
                     {e.ipAddress ? ` · ${e.ipAddress}` : ""}
-                  </Td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
+            </TableBody>
           </Table>
         )}
       </Card>

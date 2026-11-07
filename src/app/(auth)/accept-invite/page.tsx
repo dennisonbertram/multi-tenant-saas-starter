@@ -48,7 +48,7 @@ export default async function AcceptInvitePage({
         {user ? (
           user.email.toLowerCase() === invitation.email ? (
             <>
-              <p className="text-sm text-[var(--muted)]">
+              <p className="text-sm text-muted-foreground">
                 You are signed in as <strong>{user.email}</strong>. Accept below to join.
               </p>
               <form action={acceptInviteAction}>
@@ -64,7 +64,7 @@ export default async function AcceptInvitePage({
           )
         ) : (
           <>
-            <p className="text-sm text-[var(--muted)]">
+            <p className="text-sm text-muted-foreground">
               Create your account below to join {invitation.organizationName}. Use the
               invited address ({invitation.email}).
             </p>

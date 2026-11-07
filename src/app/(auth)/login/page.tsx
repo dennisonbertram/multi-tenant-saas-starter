@@ -18,11 +18,11 @@ export default async function LoginPage({
       {params.reset ? (
         <Alert kind="success">Password updated. Sign in with your new password.</Alert>
       ) : null}
-      <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-6 shadow-sm">
+      <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
         <h1 className="mb-4 text-xl font-semibold">Sign in</h1>
         <LoginForm next={next} />
       </div>
-      <p className="text-center text-sm text-[var(--muted)]">
+      <p className="text-center text-sm text-muted-foreground">
         <Link href="/forgot-password" className="underline">
           Forgot your password?
         </Link>

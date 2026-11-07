@@ -22,7 +22,7 @@ export function InviteSignupForm({ token, email }: { token: string; email: strin
       </Field>
       <Field label="Choose a password" error={state.fieldErrors?.password}>
         <Input name="password" type="password" autoComplete="new-password" required minLength={10} />
-        <span className="mt-1 block text-xs text-[var(--muted)]">At least 10 characters.</span>
+        <span className="mt-1 block text-xs text-muted-foreground">At least 10 characters.</span>
       </Field>
       <Button type="submit" disabled={pending} className="w-full">
         {pending ? "Creating account…" : "Join the organization"}

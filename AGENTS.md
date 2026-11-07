@@ -22,9 +22,11 @@ feature tempts you to add a SaaS dependency, implement it locally instead.
    function from one that isn't itself fully authorized and tenant-scoped.
 3. **Design system only.** Never build ad-hoc UI components and never
    hand-roll Tailwind for buttons, inputs, selects, tables, cards, alerts or
-   link-buttons. Use the primitives in `src/components/ui.tsx` (see
-   `docs/DESIGN-SYSTEM.md`). If something is missing, extend `ui.tsx` first,
-   then use it — do not inline styles in pages or feature components.
+   link-buttons. The system is built on **shadcn/ui**: primitives live in
+   `src/components/ui/*.tsx` (added via `npx shadcn@latest add <name>`), and
+   pages import only from the facade `src/components/ui.tsx` (see
+   `docs/DESIGN-SYSTEM.md`). Missing something? Add the shadcn component and
+   re-export it through the facade — do not inline styles in pages.
 4. **Validate all input** with zod schemas from `src/lib/validation.ts`
    (add new schemas there — don't inline ad-hoc validation).
 5. **Never store raw secret tokens** (sessions, resets, invites, email

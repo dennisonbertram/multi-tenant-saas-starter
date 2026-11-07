@@ -57,14 +57,14 @@ export default async function MembersPage() {
       <h1 className="text-2xl font-semibold">Members of {org.name}</h1>
 
       <Card title="Team">
-        <ul className="divide-y divide-[var(--border)]">
+        <ul className="divide-y divide-border">
           {members.map((m) => (
             <li key={m.membershipId} className="flex items-center justify-between gap-4 py-3">
               <div>
                 <p className="text-sm font-medium">
-                  {m.name ?? m.email} {m.userId === user.id ? <span className="text-xs text-[var(--muted)]">(you)</span> : null}
+                  {m.name ?? m.email} {m.userId === user.id ? <span className="text-xs text-muted-foreground">(you)</span> : null}
                 </p>
-                <p className="text-xs text-[var(--muted)]">{m.email}</p>
+                <p className="text-xs text-muted-foreground">{m.email}</p>
               </div>
               <div className="flex items-center gap-3">
                 {org.role === "owner" && m.userId !== user.id ? (
@@ -74,7 +74,7 @@ export default async function MembersPage() {
                     action={changeMemberRoleAction}
                   />
                 ) : (
-                  <span className="text-xs text-[var(--muted)]">{m.role}</span>
+                  <span className="text-xs text-muted-foreground">{m.role}</span>
                 )}
                 {isAdmin && m.userId !== user.id ? (
                   <form action={removeMemberAction}>
@@ -92,9 +92,9 @@ export default async function MembersPage() {
         <>
           <Card title="Pending invitations">
             {visibleInvites.length === 0 ? (
-              <p className="text-sm text-[var(--muted)]">No pending invitations.</p>
+              <p className="text-sm text-muted-foreground">No pending invitations.</p>
             ) : (
-              <ul className="divide-y divide-[var(--border)]">
+              <ul className="divide-y divide-border">
                 {visibleInvites.map((i) => (
                   <li key={i.id} className="flex items-center justify-between gap-4 py-2">
                     <span className="text-sm">
@@ -103,13 +103,13 @@ export default async function MembersPage() {
                     <div className="flex items-center gap-2">
                       <form action={resendInvitationAction}>
                         <input type="hidden" name="invitationId" value={i.id} />
-                        <Button variant="secondary" className="px-3 py-1.5 text-xs">
+                        <Button variant="secondary" size="sm">
                           Resend
                         </Button>
                       </form>
                       <form action={revokeInvitationAction}>
                         <input type="hidden" name="invitationId" value={i.id} />
-                        <Button variant="secondary" className="px-3 py-1.5 text-xs">
+                        <Button variant="secondary" size="sm">
                           Revoke
                         </Button>
                       </form>

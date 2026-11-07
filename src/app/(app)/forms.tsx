@@ -11,7 +11,17 @@ import {
   updateOrgAction,
 } from "./actions";
 import type { FormState } from "../(auth)/actions";
-import { Alert, Button, Field, Input, Select } from "@/components/ui";
+import {
+  Alert,
+  Button,
+  Field,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui";
 
 const initial: FormState = {};
 
@@ -44,8 +54,13 @@ export function InviteMemberForm({ canInviteAdmins }: { canInviteAdmins: boolean
       </Field>
       <Field label="Role" error={state.fieldErrors?.role}>
         <Select name="role" defaultValue="member">
-          <option value="member">Member</option>
-          {canInviteAdmins ? <option value="admin">Admin</option> : null}
+          <SelectTrigger className="w-full">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="member">Member</SelectItem>
+            {canInviteAdmins ? <SelectItem value="admin">Admin</SelectItem> : null}
+          </SelectContent>
         </Select>
       </Field>
       <Button type="submit" disabled={pending}>
@@ -114,7 +129,7 @@ export function ChangePasswordForm() {
       <Field label="New password" error={state.fieldErrors?.newPassword}>
         <Input name="newPassword" type="password" required minLength={10} autoComplete="new-password" />
       </Field>
-      <p className="text-xs text-[var(--muted)]">At least 10 characters. Other devices are signed out.</p>
+      <p className="text-xs text-muted-foreground">At least 10 characters. Other devices are signed out.</p>
       <Button type="submit" disabled={pending}>
         {pending ? "Changing…" : "Change password"}
       </Button>
@@ -140,13 +155,13 @@ export function ChangeEmailForm({ currentEmail, pendingEmail }: { currentEmail: 
       <Field label="Current password" error={state.fieldErrors?.currentPassword}>
         <Input name="currentPassword" type="password" required autoComplete="current-password" />
       </Field>
-      <p className="text-xs text-[var(--muted)]">
+      <p className="text-xs text-muted-foreground">
         We send a verification link to the new address; the change takes effect when you open it.
       </p>
       <Button type="submit" disabled={pending}>
         {pending ? "Sending…" : "Request email change"}
       </Button>
-      <p className="text-xs text-[var(--muted)]">Current email: {currentEmail}</p>
+      <p className="text-xs text-muted-foreground">Current email: {currentEmail}</p>
     </form>
   );
 }

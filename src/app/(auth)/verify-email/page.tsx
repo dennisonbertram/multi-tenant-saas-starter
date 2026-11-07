@@ -20,10 +20,10 @@ export default async function VerifyEmailPage({
 
   return (
     <div className="space-y-4">
-      <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-6 shadow-sm">
+      <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
         <h1 className="mb-4 text-xl font-semibold">Email verification</h1>
         {result === null ? (
-          <p className="text-sm text-[var(--muted)]">
+          <p className="text-sm text-muted-foreground">
             No token provided. Use the link from your verification email.
           </p>
         ) : result.ok ? (

@@ -28,7 +28,7 @@ export default async function DashboardPage({
       {params.welcome ? (
         <Card title={`Welcome, ${user.name ?? user.email}!`}>
           {user.emailVerifiedAt ? null : (
-            <p className="text-sm text-[var(--muted)]">
+            <p className="text-sm text-muted-foreground">
               We sent a verification link to your email — verify to unlock the full
               experience.
             </p>
@@ -44,7 +44,7 @@ export default async function DashboardPage({
 
       <div>
         <h1 className="text-2xl font-semibold">{org.name}</h1>
-        <p className="text-sm text-[var(--muted)]">Signed in as {user.email}</p>
+        <p className="text-sm text-muted-foreground">Signed in as {user.email}</p>
       </div>
 
       <Card
@@ -52,7 +52,7 @@ export default async function DashboardPage({
         description="Example tenant-scoped data. Replace the 'projects' table and this page with your real domain."
       >
         {recentProjects.length === 0 ? (
-          <p className="text-sm text-[var(--muted)]">
+          <p className="text-sm text-muted-foreground">
             No projects yet.{" "}
             <Link href="/projects" className="underline">
               Create one
@@ -60,7 +60,7 @@ export default async function DashboardPage({
             to see tenant scoping in action.
           </p>
         ) : (
-          <ul className="divide-y divide-[var(--border)]">
+          <ul className="divide-y divide-border">
             {recentProjects.map((p) => (
               <li key={p.id} className="py-2 text-sm">
                 {p.name}

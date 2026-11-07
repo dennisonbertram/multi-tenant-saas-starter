@@ -16,7 +16,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-screen">
-      <header className="border-b border-[var(--border)] bg-white">
+      <header className="border-b border-border bg-white">
         <div className="mx-auto flex max-w-5xl items-center gap-4 px-6 py-3">
           <Link href="/dashboard" className="font-semibold">
             SaaS Starter
@@ -51,10 +51,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             {orgs.length > 1 ? (
               <OrgSwitchSelect organizations={orgs} currentOrgId={org.id} action={switchOrgAction} />
             ) : (
-              <span className="text-sm font-medium text-[var(--muted)]">{org.name}</span>
+              <span className="text-sm font-medium text-muted-foreground">{org.name}</span>
             )}
             <form action={logoutAction}>
-              <Button variant="secondary" className="px-3 py-1.5 text-xs">
+              <Button variant="secondary" size="sm">
                 Sign out
               </Button>
             </form>
