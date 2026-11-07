@@ -24,8 +24,8 @@
 | F-031-001 Settings nav shown to members | link hidden for members (server rule unchanged) | 2d22316 |
 
 ## Issues filed (no git remote → local files)
-- docs/ux-walker/issues/F-020-001.md — no UI to change member roles (high)
-- docs/ux-walker/issues/F-024-001.md — destructive actions lack confirmation/undo (medium)
+- GitHub issue #1 — no UI to change member roles (high)
+- GitHub issue #2 — destructive actions lack confirmation/undo (medium)
 
 ## UX audit summary
 - **Systemic**: destructive actions without confirmation appear on two screens (projects, members) — one root fix needed (F-024-001).
