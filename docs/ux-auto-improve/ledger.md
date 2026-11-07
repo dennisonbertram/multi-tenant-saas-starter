@@ -121,3 +121,13 @@ New features (user-requested direction: "make better features"):
   (shadcn/Radix are deps now).
 - Regression: two-step delete still works end-to-end (armed → confirm →
   row gone from DB).
+
+## Round 15 — Cross-cutting polish (2025-XX-XX)
+- **Added — working dark mode:** the .dark token block existed but nothing
+  applied it. Dependency-free theme system: inline flash-prevention script
+  in the root layout (localStorage, falls back to OS preference) +
+  ThemeToggle in the sidebar footer. Verified: toggles both ways, persists,
+  body bg switches gray-950 ↔ white; dark dashboard/members visually
+  coherent (vision-checked: no light cards, no broken contrast).
+- **Added — favicon:** src/app/icon.svg (blue rounded square, white S),
+  served by Next automatically.

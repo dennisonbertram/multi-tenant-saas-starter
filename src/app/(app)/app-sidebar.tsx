@@ -24,6 +24,7 @@ import {
   SidebarRail,
 } from "@/components/ui";
 import { OrgSwitchSelect } from "./org-switch-select";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { logoutAction } from "../(auth)/actions";
 
 type Org = { id: string; name: string };
@@ -152,6 +153,11 @@ export function AppSidebar({
             <div className="px-2 py-1.5">
               <p className="truncate text-sm font-medium">{user.name ?? user.email}</p>
               <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+            </div>
+          </SidebarMenuItem>
+          <SidebarMenuItem>
+            <div className="flex items-center gap-1 px-2 py-1">
+              <ThemeToggle />
             </div>
           </SidebarMenuItem>
           <SidebarMenuItem>
