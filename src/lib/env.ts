@@ -53,5 +53,10 @@ if (!parsed.success) {
 
 export const env = parsed.data;
 
-/** True when SMTP is not configured — emails are logged to console instead. */
-export const emailDevMode = env.NODE_ENV !== "production" && !env.SMTP_HOST;
+/**
+ * True when SMTP is not configured — emails are logged to console instead.
+ * Deliberately environment-independent: a bare-bones production deploy
+ * without SMTP must still work (signup sends a verification email); it
+ * logs the link instead of crashing.
+ */
+export const emailDevMode = !env.SMTP_HOST;
