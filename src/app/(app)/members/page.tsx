@@ -2,7 +2,8 @@ import { and, desc, eq, isNull } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { invitations, memberships, users } from "@/lib/db/schema";
 import { requireOrg } from "@/lib/tenancy";
-import { removeMemberAction, revokeInvitationAction } from "../actions";
+import { changeMemberRoleAction, removeMemberAction, revokeInvitationAction } from "../actions";
+import { RoleSelect } from "../role-select";
 import { Alert, Button, Card } from "@/components/ui";
 import { InviteMemberForm } from "../forms";
 
@@ -62,25 +63,30 @@ export default async function MembersPage() {
                 <p className="text-sm font-medium">
                   {m.name ?? m.email} {m.userId === user.id ? <span className="text-xs text-[var(--muted)]">(you)</span> : null}
                 </p>
-                <p className="text-xs text-[var(--muted)]">
-                  {m.email} · {m.role}
-                </p>
+                <p className="text-xs text-[var(--muted)]">{m.email}</p>
               </div>
-              {isAdmin && m.userId !== user.id ? (
-                <form action={removeMemberAction}>
-                  <input type="hidden" name="membershipId" value={m.membershipId} />
-                  <Button variant="danger" className="px-3 py-1.5 text-xs">
-                    Remove
-                  </Button>
-                </form>
-              ) : null}
+              <div className="flex items-center gap-3">
+                {org.role === "owner" && m.userId !== user.id ? (
+                  <RoleSelect
+                    membershipId={m.membershipId}
+                    role={m.role}
+                    action={changeMemberRoleAction}
+                  />
+                ) : (
+                  <span className="text-xs text-[var(--muted)]">{m.role}</span>
+                )}
+                {isAdmin && m.userId !== user.id ? (
+                  <form action={removeMemberAction}>
+                    <input type="hidden" name="membershipId" value={m.membershipId} />
+                    <Button variant="danger" className="px-3 py-1.5 text-xs">
+                      Remove
+                    </Button>
+                  </form>
+                ) : null}
+              </div>
             </li>
           ))}
         </ul>
-        <p className="mt-3 text-xs text-[var(--muted)]">
-          Role changes (owner-only) are done via the API or a management script in this
-          starter — extend the members page with a role selector if you need it in the UI.
-        </p>
       </Card>
 
       {isAdmin ? (
