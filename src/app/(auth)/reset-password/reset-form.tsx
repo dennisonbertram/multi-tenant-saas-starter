@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 import { resetPasswordAction, type FormState } from "../actions";
-import { Alert, Button, Field, Input } from "@/components/ui";
+import { Alert, Button, Field, Input, PasswordInput } from "@/components/ui";
 
 const initial: FormState = {};
 
@@ -14,9 +14,8 @@ export function ResetPasswordForm({ token }: { token: string }) {
       {state.error ? <Alert kind="error">{state.error}</Alert> : null}
       <input type="hidden" name="token" value={token} />
       <Field label="New password" error={state.fieldErrors?.password}>
-        <Input
+        <PasswordInput
           name="password"
-          type="password"
           autoComplete="new-password"
           required
           minLength={10}

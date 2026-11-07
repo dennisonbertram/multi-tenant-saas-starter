@@ -16,6 +16,7 @@ import {
   Button,
   Field,
   Input,
+  PasswordInput,
   Select,
   SelectContent,
   SelectItem,
@@ -124,10 +125,10 @@ export function ChangePasswordForm() {
       {state.success ? <Alert kind="success">{state.success}</Alert> : null}
       {state.error ? <Alert kind="error">{state.error}</Alert> : null}
       <Field label="Current password" error={state.fieldErrors?.currentPassword}>
-        <Input name="currentPassword" type="password" required autoComplete="current-password" />
+        <PasswordInput name="currentPassword" autoComplete="current-password" required />
       </Field>
       <Field label="New password" error={state.fieldErrors?.newPassword}>
-        <Input name="newPassword" type="password" required minLength={10} autoComplete="new-password" />
+        <PasswordInput name="newPassword" minLength={10} autoComplete="new-password" required />
       </Field>
       <p className="text-xs text-muted-foreground">At least 10 characters. Other devices are signed out.</p>
       <Button type="submit" disabled={pending}>
@@ -153,7 +154,7 @@ export function ChangeEmailForm({ currentEmail, pendingEmail }: { currentEmail: 
         <Input name="newEmail" type="email" required autoComplete="email" />
       </Field>
       <Field label="Current password" error={state.fieldErrors?.currentPassword}>
-        <Input name="currentPassword" type="password" required autoComplete="current-password" />
+        <PasswordInput name="currentPassword" autoComplete="current-password" required />
       </Field>
       <p className="text-xs text-muted-foreground">
         We send a verification link to the new address; the change takes effect when you open it.

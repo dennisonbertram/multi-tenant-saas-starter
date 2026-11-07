@@ -67,3 +67,12 @@ Section: dashboard. Reviewed post-shadcn/post-sidebar.
   (low-stakes, re-invitable).
 - Regression seed: one fresh + one expired invite via SQL; verified both
   render correctly (r4-members.png).
+
+## Round 10 — Auth flows (2025-XX-XX)
+- **Added — PasswordInput with show/hide toggle** (design-system component
+  in ui.tsx, Lucide Eye/EyeOff, aria-label swaps). Replaced every raw
+  password input: login, signup, reset-password, accept-invite, account
+  password change. Verified toggle flips type both ways on /login.
+- Reviewed and kept as-is: anti-enumeration on forgot-password (generic
+  response), pending states on all submit buttons, autocomplete attrs,
+  autoFocus on email — all already correct.

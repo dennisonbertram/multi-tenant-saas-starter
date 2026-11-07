@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 import { loginAction, type FormState } from "../actions";
-import { Alert, Button, Field, Input } from "@/components/ui";
+import { Alert, Button, Field, Input, PasswordInput } from "@/components/ui";
 
 const initial: FormState = {};
 
@@ -16,7 +16,7 @@ export function LoginForm({ next }: { next?: string }) {
         <Input name="email" type="email" autoComplete="email" required autoFocus />
       </Field>
       <Field label="Password" error={state.fieldErrors?.password}>
-        <Input name="password" type="password" autoComplete="current-password" required />
+        <PasswordInput name="password" autoComplete="current-password" required />
       </Field>
       <input type="hidden" name="next" value={next ?? ""} />
       <Button type="submit" disabled={pending} className="w-full">

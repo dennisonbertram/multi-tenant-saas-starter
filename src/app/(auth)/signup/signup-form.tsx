@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 import { signupAction, type FormState } from "../actions";
-import { Alert, Button, Field, Input } from "@/components/ui";
+import { Alert, Button, Field, Input, PasswordInput } from "@/components/ui";
 
 const initial: FormState = {};
 
@@ -22,9 +22,8 @@ export function SignupForm() {
         label="Password"
         error={state.fieldErrors?.password}
       >
-        <Input
+        <PasswordInput
           name="password"
-          type="password"
           autoComplete="new-password"
           required
           minLength={10}

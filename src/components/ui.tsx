@@ -196,6 +196,35 @@ export function StatCard({
   );
 }
 
+// ── Password input ── show/hide toggle (client) ─────────────────────────────
+
+import * as React from "react";
+import { Eye, EyeOff } from "lucide-react";
+
+function PasswordInputImpl({ className, ...props }: React.ComponentProps<typeof ShadcnInput>) {
+  const [show, setShow] = React.useState(false);
+  return (
+    <div className="relative">
+      <ShadcnInput
+        type={show ? "text" : "password"}
+        className={className ? `${className} pr-10` : "pr-10"}
+        {...props}
+      />
+      <button
+        type="button"
+        onClick={() => setShow((s) => !s)}
+        aria-label={show ? "Hide password" : "Show password"}
+        className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-muted-foreground hover:text-foreground"
+      >
+        {show ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+      </button>
+    </div>
+  );
+}
+
+/** Input with a show/hide password toggle. Use for every password field. */
+export const PasswordInput = PasswordInputImpl;
+
 // ── Tables ──────────────────────────────────────────────────────────────────
 
 export {
