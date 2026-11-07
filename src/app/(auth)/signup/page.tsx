@@ -1,9 +1,15 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { getCurrentUser } from "@/lib/auth/session";
 import { SignupForm } from "./signup-form";
 
 export const metadata = { title: "Create account" };
 
-export default function SignupPage() {
+export default async function SignupPage() {
+  // Real session check — signed-in users don't need the signup form.
+  const user = await getCurrentUser();
+  if (user) redirect("/dashboard");
+
   return (
     <div className="space-y-4">
       <div className="rounded-lg border border-border bg-card p-6 shadow-sm">

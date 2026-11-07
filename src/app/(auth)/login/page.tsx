@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Alert } from "@/components/ui";
+import { getCurrentUser } from "@/lib/auth/session";
 import { LoginForm } from "./login-form";
 
 export const metadata = { title: "Sign in" };
@@ -9,6 +11,12 @@ export default async function LoginPage({
 }: {
   searchParams: Promise<{ next?: string; reset?: string }>;
 }) {
+  // Real session check (DB-backed). Signed-in users skip the form; a stale
+  // cookie just renders the form instead of looping (middleware no longer
+  // bounces auth pages on cookie presence alone).
+  const user = await getCurrentUser();
+  if (user) redirect("/dashboard");
+
   const params = await searchParams;
   // Open-redirect guard: only allow same-app relative paths.
   const next = params.next?.startsWith("/") ? params.next : undefined;

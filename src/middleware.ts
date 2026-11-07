@@ -7,12 +7,16 @@ import { SESSION_COOKIE } from "@/lib/auth/cookies";
  * IMPORTANT: the session cookie's *presence* is checked here, not its
  * validity (the edge runtime cannot query the database). Actual
  * authorization always happens server-side in layouts/pages/actions via
- * requireOrg(). This middleware only avoids rendering protected shells for
- * obviously-logged-out visitors.
+ * requireOrg().
+ *
+ * Deliberately does NOT redirect signed-in-looking users away from auth
+ * pages: a stale/invalid cookie (e.g. left over from another app on the
+ * same host) would cause an infinite login<->dashboard redirect loop.
+ * Auth pages that need it do a REAL session check server-side instead
+ * (see login/signup pages calling getCurrentUser()).
  */
 
 const PROTECTED_PREFIXES = ["/dashboard", "/settings", "/members", "/projects"];
-const AUTH_PAGES = ["/login", "/signup", "/forgot-password", "/reset-password"];
 
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
@@ -20,9 +24,7 @@ export function middleware(req: NextRequest) {
 
   let res: NextResponse;
 
-  if (hasSessionCookie && AUTH_PAGES.some((p) => pathname.startsWith(p))) {
-    res = NextResponse.redirect(new URL("/dashboard", req.url));
-  } else if (!hasSessionCookie && PROTECTED_PREFIXES.some((p) => pathname.startsWith(p))) {
+  if (!hasSessionCookie && PROTECTED_PREFIXES.some((p) => pathname.startsWith(p))) {
     const url = new URL("/login", req.url);
     if (pathname !== "/dashboard") url.searchParams.set("next", pathname);
     res = NextResponse.redirect(url);
