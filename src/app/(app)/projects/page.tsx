@@ -3,7 +3,8 @@ import { db } from "@/lib/db";
 import { projects } from "@/lib/db/schema";
 import { requireOrg } from "@/lib/tenancy";
 import { deleteProjectAction } from "../actions";
-import { Button, Card } from "@/components/ui";
+import { Card } from "@/components/ui";
+import { ConfirmSubmit } from "@/components/confirm-button";
 import { CreateProjectForm } from "../forms";
 
 export const metadata = { title: "Projects" };
@@ -47,9 +48,7 @@ export default async function ProjectsPage() {
                 {org.role !== "member" ? (
                   <form action={deleteProjectAction}>
                     <input type="hidden" name="projectId" value={p.id} />
-                    <Button variant="danger" className="px-3 py-1.5 text-xs">
-                      Delete
-                    </Button>
+                    <ConfirmSubmit>Delete</ConfirmSubmit>
                   </form>
                 ) : null}
               </li>

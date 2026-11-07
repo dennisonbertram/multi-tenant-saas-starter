@@ -4,6 +4,7 @@ import { invitations, memberships, users } from "@/lib/db/schema";
 import { requireOrg } from "@/lib/tenancy";
 import { changeMemberRoleAction, removeMemberAction, revokeInvitationAction } from "../actions";
 import { RoleSelect } from "../role-select";
+import { ConfirmSubmit } from "@/components/confirm-button";
 import { Alert, Button, Card } from "@/components/ui";
 import { InviteMemberForm } from "../forms";
 
@@ -78,9 +79,7 @@ export default async function MembersPage() {
                 {isAdmin && m.userId !== user.id ? (
                   <form action={removeMemberAction}>
                     <input type="hidden" name="membershipId" value={m.membershipId} />
-                    <Button variant="danger" className="px-3 py-1.5 text-xs">
-                      Remove
-                    </Button>
+                    <ConfirmSubmit confirmLabel="Confirm remove?">Remove</ConfirmSubmit>
                   </form>
                 ) : null}
               </div>
