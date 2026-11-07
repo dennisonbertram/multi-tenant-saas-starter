@@ -32,7 +32,7 @@ export default async function ProjectsPage() {
         <CreateProjectForm />
       </Card>
 
-      <Card title={`All projects in ${org.name}`}>
+      <Card title="All projects">
         {rows.length === 0 ? (
           <p className="text-sm text-[var(--muted)]">Nothing here yet.</p>
         ) : (

@@ -27,10 +27,18 @@ export default async function DashboardPage({
     <div className="space-y-6">
       {params.welcome ? (
         <Card title={`Welcome, ${user.name ?? user.email}!`}>
-          <p className="text-sm text-[var(--muted)]">
-            Your organization <strong>{org.name}</strong> is ready. We sent a
-            verification link to your email — verify to unlock the full experience.
-          </p>
+          {user.emailVerified ? null : (
+            <p className="text-sm text-[var(--muted)]">
+              We sent a verification link to your email — verify to unlock the full
+              experience.
+            </p>
+          )}
+          <Link
+            href="/projects"
+            className="mt-3 inline-flex items-center justify-center rounded-md bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
+          >
+            Create your first project
+          </Link>
         </Card>
       ) : null}
       {params.error === "forbidden" ? (
@@ -41,9 +49,7 @@ export default async function DashboardPage({
 
       <div>
         <h1 className="text-2xl font-semibold">{org.name}</h1>
-        <p className="text-sm text-[var(--muted)]">
-          Signed in as {user.email} · your role here: <strong>{org.role}</strong>
-        </p>
+        <p className="text-sm text-[var(--muted)]">Signed in as {user.email}</p>
       </div>
 
       <Card

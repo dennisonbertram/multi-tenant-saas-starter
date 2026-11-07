@@ -12,7 +12,7 @@ export default async function SettingsPage() {
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold">Settings</h1>
 
-      <Card title="Organization" description={`Slug: ${org.slug} · your role: ${org.role}`}>
+      <Card title="Organization" description={`Slug: ${org.slug}`}>
         <RenameOrgForm name={org.name} />
       </Card>
 
