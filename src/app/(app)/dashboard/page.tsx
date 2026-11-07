@@ -27,7 +27,7 @@ export default async function DashboardPage({
     <div className="space-y-6">
       {params.welcome ? (
         <Card title={`Welcome, ${user.name ?? user.email}!`}>
-          {user.emailVerified ? null : (
+          {user.emailVerifiedAt ? null : (
             <p className="text-sm text-[var(--muted)]">
               We sent a verification link to your email — verify to unlock the full
               experience.
