@@ -48,7 +48,30 @@ export async function createAuthToken(
 }
 
 /**
- * Atomically claim a token: returns the row's userId if the token is valid
+ * Check whether a token is currently valid WITHOUT consuming it.
+ * Used to render early rejection on token pages (reset, invite) instead of
+ * letting the user fill a form that will be rejected on submit.
+ */
+export async function peekAuthToken(
+  raw: string,
+  type: TokenType,
+): Promise<{ userId: string } | null> {
+  const rows = await db
+    .select({ userId: authTokens.userId })
+    .from(authTokens)
+    .where(
+      and(
+        eq(authTokens.tokenHash, hashToken(raw)),
+        eq(authTokens.type, type),
+        isNull(authTokens.usedAt),
+        gt(authTokens.expiresAt, new Date()),
+      ),
+    )
+    .limit(1);
+  return rows[0] ?? null;
+}
+
+/** Atomically claim a token: returns the row's userId if the token is valid
  * (exists, correct type, unused, unexpired), marks it used, otherwise null.
  * The conditional UPDATE makes concurrent reuse impossible.
  */

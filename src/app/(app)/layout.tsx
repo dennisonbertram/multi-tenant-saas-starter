@@ -31,9 +31,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             <Link href="/members" className="rounded-md px-3 py-1.5 hover:bg-slate-100">
               Members
             </Link>
-            <Link href="/settings" className="rounded-md px-3 py-1.5 hover:bg-slate-100">
-              Settings
-            </Link>
+            {org.role !== "member" ? (
+              <Link href="/settings" className="rounded-md px-3 py-1.5 hover:bg-slate-100">
+                Settings
+              </Link>
+            ) : null}
           </nav>
 
           <div className="ml-auto flex items-center gap-3">
