@@ -241,3 +241,5 @@ export {
 } from "@/components/ui/sidebar";
 
 export { Separator } from "@/components/ui/separator";
+
+export { Badge } from "@/components/ui/badge";

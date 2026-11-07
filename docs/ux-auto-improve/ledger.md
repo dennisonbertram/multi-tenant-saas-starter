@@ -56,3 +56,14 @@ Section: dashboard. Reviewed post-shadcn/post-sidebar.
 - **Fixed — form-first always:** create card now renders after the list
   when projects exist, before it when empty (onboarding preserved).
   Verified both orders live.
+
+## Round 9 — Members (2025-XX-XX)
+- **Fixed — invites vanished silently on expiry:** expired invites were
+  filtered out of the pending list with no trace; admins couldn't see why a
+  link "didn't work". Expired rows now stay visible (dimmed, "Expired <date>"
+  badge) with Resend (token regeneration = re-invite) and Revoke.
+- **Added — expiry dates** on active invite rows ("expires Nov 12, 2025").
+- Rejected: joined-date on member rows (clutter); confirm on Revoke
+  (low-stakes, re-invitable).
+- Regression seed: one fresh + one expired invite via SQL; verified both
+  render correctly (r4-members.png).

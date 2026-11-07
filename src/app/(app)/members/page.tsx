@@ -5,7 +5,7 @@ import { requireOrg } from "@/lib/tenancy";
 import { changeMemberRoleAction, removeMemberAction, resendInvitationAction, revokeInvitationAction } from "../actions";
 import { RoleSelect } from "../role-select";
 import { ConfirmSubmit } from "@/components/confirm-button";
-import { Alert, Button, Card } from "@/components/ui";
+import { Alert, Badge, Button, Card } from "@/components/ui";
 import { InviteMemberForm } from "../forms";
 
 export const metadata = { title: "Members" };
@@ -50,7 +50,12 @@ export default async function MembersPage() {
         )
     : [];
 
-  const visibleInvites = pendingInvites.filter((i) => i.expiresAt > new Date());
+  // Expired invites stay visible (muted + badge) instead of vanishing
+  // silently — an admin should see WHY a link stopped working.
+  const activeInvites = pendingInvites.filter((i) => i.expiresAt > new Date());
+  const expiredInvites = pendingInvites.filter((i) => i.expiresAt <= new Date());
+  const fmtDate = (d: Date) =>
+    d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
   return (
     <div className="space-y-6">
@@ -91,14 +96,41 @@ export default async function MembersPage() {
       {isAdmin ? (
         <>
           <Card title="Pending invitations">
-            {visibleInvites.length === 0 ? (
+            {activeInvites.length === 0 && expiredInvites.length === 0 ? (
               <p className="text-sm text-muted-foreground">No pending invitations.</p>
             ) : (
               <ul className="divide-y divide-border">
-                {visibleInvites.map((i) => (
+                {activeInvites.map((i) => (
                   <li key={i.id} className="flex items-center justify-between gap-4 py-2">
                     <span className="text-sm">
                       {i.email} · {i.role}
+                      <span className="ml-2 text-xs text-muted-foreground">
+                        expires {fmtDate(i.expiresAt)}
+                      </span>
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <form action={resendInvitationAction}>
+                        <input type="hidden" name="invitationId" value={i.id} />
+                        <Button variant="secondary" size="sm">
+                          Resend
+                        </Button>
+                      </form>
+                      <form action={revokeInvitationAction}>
+                        <input type="hidden" name="invitationId" value={i.id} />
+                        <Button variant="secondary" size="sm">
+                          Revoke
+                        </Button>
+                      </form>
+                    </div>
+                  </li>
+                ))}
+                {expiredInvites.map((i) => (
+                  <li key={i.id} className="flex items-center justify-between gap-4 py-2 opacity-60">
+                    <span className="text-sm">
+                      {i.email} · {i.role}
+                      <Badge variant="outline" className="ml-2">
+                        Expired {fmtDate(i.expiresAt)}
+                      </Badge>
                     </span>
                     <div className="flex items-center gap-2">
                       <form action={resendInvitationAction}>
