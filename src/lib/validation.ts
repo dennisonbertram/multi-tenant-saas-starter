@@ -63,6 +63,20 @@ export const createProjectSchema = z.object({
   description: z.string().trim().max(500).optional().or(z.literal("")),
 });
 
+export const updateNameSchema = z.object({
+  name: z.string().trim().min(1, "Name is required").max(100),
+});
+
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, "Current password is required").max(200),
+  newPassword: passwordSchema,
+});
+
+export const changeEmailSchema = z.object({
+  newEmail: emailSchema,
+  currentPassword: z.string().min(1, "Current password is required").max(200),
+});
+
 /** Flatten a ZodError into { field: message } for form rendering. */
 export function fieldErrors(error: z.ZodError): Record<string, string> {
   const out: Record<string, string> = {};

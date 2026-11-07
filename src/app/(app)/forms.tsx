@@ -2,9 +2,12 @@
 
 import { useActionState } from "react";
 import {
+  changePasswordAction,
   createOrgAction,
   createProjectAction,
   inviteMemberAction,
+  requestEmailChangeAction,
+  updateNameAction,
   updateOrgAction,
 } from "./actions";
 import type { FormState } from "../(auth)/actions";
@@ -82,6 +85,71 @@ export function CreateOrgForm() {
       <Button type="submit" disabled={pending}>
         {pending ? "Creating…" : "Create organization"}
       </Button>
+    </form>
+  );
+}
+
+export function UpdateNameForm({ name }: { name: string | null }) {
+  const [state, formAction, pending] = useActionState(updateNameAction, initial);
+  return (
+    <form action={formAction} className="space-y-3">
+      {state.success ? <Alert kind="success">{state.success}</Alert> : null}
+      {state.error ? <Alert kind="error">{state.error}</Alert> : null}
+      <Field label="Display name" error={state.fieldErrors?.name}>
+        <Input name="name" defaultValue={name ?? ""} required maxLength={100} />
+      </Field>
+      <Button type="submit" disabled={pending}>
+        {pending ? "Saving…" : "Save name"}
+      </Button>
+    </form>
+  );
+}
+
+export function ChangePasswordForm() {
+  const [state, formAction, pending] = useActionState(changePasswordAction, initial);
+  return (
+    <form action={formAction} className="space-y-3">
+      {state.success ? <Alert kind="success">{state.success}</Alert> : null}
+      {state.error ? <Alert kind="error">{state.error}</Alert> : null}
+      <Field label="Current password" error={state.fieldErrors?.currentPassword}>
+        <Input name="currentPassword" type="password" required autoComplete="current-password" />
+      </Field>
+      <Field label="New password" error={state.fieldErrors?.newPassword}>
+        <Input name="newPassword" type="password" required minLength={10} autoComplete="new-password" />
+      </Field>
+      <p className="text-xs text-[var(--muted)]">At least 10 characters. Other devices are signed out.</p>
+      <Button type="submit" disabled={pending}>
+        {pending ? "Changing…" : "Change password"}
+      </Button>
+    </form>
+  );
+}
+
+export function ChangeEmailForm({ currentEmail, pendingEmail }: { currentEmail: string; pendingEmail: string | null }) {
+  const [state, formAction, pending] = useActionState(requestEmailChangeAction, initial);
+  return (
+    <form action={formAction} className="space-y-3">
+      {state.success ? <Alert kind="success">{state.success}</Alert> : null}
+      {state.error ? <Alert kind="error">{state.error}</Alert> : null}
+      {pendingEmail ? (
+        <Alert kind="error">
+          A change to <strong>{pendingEmail}</strong> is pending — open the verification link we
+          sent to that address to complete it.
+        </Alert>
+      ) : null}
+      <Field label="New email" error={state.fieldErrors?.newEmail}>
+        <Input name="newEmail" type="email" required autoComplete="email" />
+      </Field>
+      <Field label="Current password" error={state.fieldErrors?.currentPassword}>
+        <Input name="currentPassword" type="password" required autoComplete="current-password" />
+      </Field>
+      <p className="text-xs text-[var(--muted)]">
+        We send a verification link to the new address; the change takes effect when you open it.
+      </p>
+      <Button type="submit" disabled={pending}>
+        {pending ? "Sending…" : "Request email change"}
+      </Button>
+      <p className="text-xs text-[var(--muted)]">Current email: {currentEmail}</p>
     </form>
   );
 }

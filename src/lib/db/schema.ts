@@ -39,6 +39,8 @@ export const users = pgTable(
     passwordHash: text("password_hash").notNull(),
     name: text("name"),
     emailVerifiedAt: timestamp("email_verified_at", { withTimezone: true }),
+    /** Set while an email change is awaiting verification of the new address. */
+    pendingEmail: text("pending_email"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },

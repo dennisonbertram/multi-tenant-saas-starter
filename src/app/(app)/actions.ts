@@ -3,14 +3,17 @@
 import { revalidatePath } from "next/cache";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { and, eq, sql } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
-import { invitations, memberships, organizations, projects, users } from "@/lib/db/schema";
+import { auditLog, invitations, memberships, organizations, projects, users } from "@/lib/db/schema";
 import { audit } from "@/lib/audit";
 import { getCurrentUser } from "@/lib/auth/session";
-import { clientIp } from "@/lib/auth/rate-limit";
-import { createAuthToken, hashToken } from "@/lib/auth/tokens";
-import { sendInviteEmail } from "@/lib/mail";
+import { hashPassword, verifyPassword } from "@/lib/auth/password";
+import { destroyOtherSessions } from "@/lib/auth/session";
+import { SESSION_COOKIE } from "@/lib/auth/cookies";
+import { clientIp, rateLimit } from "@/lib/auth/rate-limit";
+import { createAuthToken, hashToken, revokeAuthTokens } from "@/lib/auth/tokens";
+import { sendInviteEmail, sendVerificationEmail } from "@/lib/mail";
 import { env } from "@/lib/env";
 import {
   ACTIVE_ORG_COOKIE,
@@ -20,11 +23,14 @@ import {
   verifyMembership,
 } from "@/lib/tenancy";
 import {
+  changeEmailSchema,
+  changePasswordSchema,
   createOrganizationSchema,
   createProjectSchema,
   fieldErrors,
   inviteMemberSchema,
   roleChangeSchema,
+  updateNameSchema,
   updateOrganizationSchema,
 } from "@/lib/validation";
 import type { FormState } from "../(auth)/actions";
@@ -272,4 +278,176 @@ export async function deleteProjectAction(formData: FormData): Promise<void> {
     .where(and(eq(projects.id, projectId), eq(projects.organizationId, org.id)));
   await audit({ userId: user.id, organizationId: org.id, action: "project.deleted", metadata: { projectId } });
   revalidatePath("/projects");
+}
+
+// ── Account settings (issue #3) ─────────────────────────────────────────────
+
+/** Update the signed-in user's display name. */
+export async function updateNameAction(_prev: FormState, formData: FormData): Promise<FormState> {
+  const user = await getCurrentUser();
+  if (!user) redirect("/login");
+
+  const parsed = updateNameSchema.safeParse({ name: formData.get("name") });
+  if (!parsed.success) return { fieldErrors: fieldErrors(parsed.error) };
+
+  await db.update(users).set({ name: parsed.data.name, updatedAt: new Date() }).where(eq(users.id, user.id));
+  await audit({ userId: user.id, action: "account.name_changed", metadata: { name: parsed.data.name } });
+  revalidatePath("/settings/account");
+  revalidatePath("/members");
+  return { success: "Name updated." };
+}
+
+/** Change password: verify current, re-hash, log out every OTHER device. */
+export async function changePasswordAction(_prev: FormState, formData: FormData): Promise<FormState> {
+  const h = await headers();
+  if (!rateLimit(`pw-change:${clientIp(h)}`, { limit: 5, windowMs: 60_000 }).ok) {
+    return { error: "Too many attempts. Please wait a minute." };
+  }
+  const user = await getCurrentUser();
+  if (!user) redirect("/login");
+
+  const parsed = changePasswordSchema.safeParse({
+    currentPassword: formData.get("currentPassword"),
+    newPassword: formData.get("newPassword"),
+  });
+  if (!parsed.success) return { fieldErrors: fieldErrors(parsed.error) };
+
+  const [row] = await db.select({ passwordHash: users.passwordHash }).from(users).where(eq(users.id, user.id)).limit(1);
+  if (!row || !(await verifyPassword(parsed.data.currentPassword, row.passwordHash))) {
+    return { fieldErrors: { currentPassword: "Current password is incorrect." } };
+  }
+
+  await db
+    .update(users)
+    .set({ passwordHash: await hashPassword(parsed.data.newPassword), updatedAt: new Date() })
+    .where(eq(users.id, user.id));
+
+  // Log out other devices; keep the current session alive.
+  const currentToken = (await cookies()).get(SESSION_COOKIE)?.value ?? "";
+  if (currentToken) await destroyOtherSessions(user.id, currentToken);
+
+  await audit({
+    userId: user.id,
+    action: "account.password_changed",
+    ipAddress: clientIp(h),
+  });
+  return { success: "Password changed. Other devices have been signed out." };
+}
+
+/**
+ * Request an email change: verify password, store the new address as
+ * pendingEmail and send a verification link to the NEW address. The address
+ * only takes effect when that link is claimed (see verifyEmailToken).
+ */
+export async function requestEmailChangeAction(_prev: FormState, formData: FormData): Promise<FormState> {
+  const h = await headers();
+  if (!rateLimit(`email-change:${clientIp(h)}`, { limit: 5, windowMs: 60_000 }).ok) {
+    return { error: "Too many attempts. Please wait a minute." };
+  }
+  const user = await getCurrentUser();
+  if (!user) redirect("/login");
+
+  const parsed = changeEmailSchema.safeParse({
+    newEmail: formData.get("newEmail"),
+    currentPassword: formData.get("currentPassword"),
+  });
+  if (!parsed.success) return { fieldErrors: fieldErrors(parsed.error) };
+
+  const [row] = await db.select({ passwordHash: users.passwordHash }).from(users).where(eq(users.id, user.id)).limit(1);
+  if (!row || !(await verifyPassword(parsed.data.currentPassword, row.passwordHash))) {
+    return { fieldErrors: { currentPassword: "Current password is incorrect." } };
+  }
+  if (parsed.data.newEmail === user.email) {
+    return { fieldErrors: { newEmail: "That is already your email address." } };
+  }
+  const taken = await db.select({ id: users.id }).from(users).where(eq(users.email, parsed.data.newEmail)).limit(1);
+  if (taken.length > 0) {
+    return { fieldErrors: { newEmail: "That email address is already in use." } };
+  }
+
+  await db.update(users).set({ pendingEmail: parsed.data.newEmail }).where(eq(users.id, user.id));
+  await revokeAuthTokens(user.id, "email_verify");
+  const token = await createAuthToken(user.id, "email_verify");
+  await sendVerificationEmail(
+    parsed.data.newEmail,
+    user.name,
+    `${env.APP_URL}/verify-email?token=${token}`,
+  );
+  await audit({
+    userId: user.id,
+    action: "account.email_change_requested",
+    metadata: { newEmail: parsed.data.newEmail },
+    ipAddress: clientIp(h),
+  });
+  revalidatePath("/settings/account");
+  return { success: `Verification link sent to ${parsed.data.newEmail}. The change takes effect once you open it.` };
+}
+
+// ── Audit log viewer (issue #4) ─────────────────────────────────────────────
+
+/** Read model for /audit — org-scoped, newest first. Never used for authz. */
+export async function listAuditEvents(orgId: string, page: number) {
+  const pageSize = 50;
+  return db
+    .select({
+      id: auditLog.id,
+      action: auditLog.action,
+      metadata: auditLog.metadata,
+      ipAddress: auditLog.ipAddress,
+      createdAt: auditLog.createdAt,
+      actorEmail: users.email,
+      actorName: users.name,
+    })
+    .from(auditLog)
+    .leftJoin(users, eq(users.id, auditLog.userId))
+    .where(eq(auditLog.organizationId, orgId))
+    .orderBy(desc(auditLog.createdAt))
+    .limit(pageSize + 1)
+    .offset((page - 1) * pageSize)
+    .then((rows) => ({ rows: rows.slice(0, pageSize), hasMore: rows.length > pageSize }));
+}
+
+// ── Invitation re-send (issue #5) ───────────────────────────────────────────
+
+/**
+ * Re-send an invitation email. Raw tokens are never stored (only hashes),
+ * so a re-send REGENERATES the token: the old link stops working, the new
+ * email carries a fresh one with the same 7-day expiry window.
+ */
+export async function resendInvitationAction(formData: FormData): Promise<void> {
+  const { user, org } = await requireRole("admin");
+  const invitationId = formData.get("invitationId")?.toString() ?? "";
+
+  if (!rateLimit(`invite-resend:${invitationId}`, { limit: 1, windowMs: 60_000 }).ok) {
+    return; // at most one re-send per invitation per minute
+  }
+
+  const [invitation] = await db
+    .select({ email: invitations.email, role: invitations.role, expiresAt: invitations.expiresAt })
+    .from(invitations)
+    .where(
+      and(
+        eq(invitations.id, invitationId),
+        eq(invitations.organizationId, org.id),
+        sql`${invitations.acceptedAt} IS NULL AND ${invitations.revokedAt} IS NULL AND ${invitations.expiresAt} > now()`,
+      ),
+    )
+    .limit(1);
+  if (!invitation) return;
+
+  const raw = await createAuthToken(user.id, "invite");
+  await db
+    .update(invitations)
+    .set({ tokenHash: hashToken(raw) })
+    .where(and(eq(invitations.id, invitationId), eq(invitations.organizationId, org.id)));
+
+  await sendInviteEmail(invitation.email, org.name, user.name ?? user.email, `${env.APP_URL}/accept-invite?token=${raw}`);
+  await audit({
+    userId: user.id,
+    organizationId: org.id,
+    action: "member.invite_resent",
+    metadata: { invitationId, email: invitation.email },
+    ipAddress: clientIp(await headers()),
+  });
+  revalidatePath("/members");
 }

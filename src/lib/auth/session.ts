@@ -1,6 +1,6 @@
 import { createHash, randomBytes } from "node:crypto";
 import { cookies } from "next/headers";
-import { and, eq, gt } from "drizzle-orm";
+import { and, eq, gt, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { sessions, users } from "@/lib/db/schema";
 import { SESSION_COOKIE } from "./cookies";
@@ -24,6 +24,7 @@ export type SessionUser = {
   email: string;
   name: string | null;
   emailVerifiedAt: Date | null;
+  pendingEmail: string | null;
 };
 
 function hashToken(raw: string): string {
@@ -80,6 +81,7 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
       email: users.email,
       name: users.name,
       emailVerifiedAt: users.emailVerifiedAt,
+      pendingEmail: users.pendingEmail,
     })
     .from(sessions)
     .innerJoin(users, eq(users.id, sessions.userId))
@@ -92,4 +94,15 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
 /** Delete every session for a user — used after password reset / email change. */
 export async function destroyAllSessions(userId: string): Promise<void> {
   await db.delete(sessions).where(eq(sessions.userId, userId));
+}
+
+/**
+ * Delete all of a user's sessions EXCEPT the current one — used after a
+ * password change so other devices are logged out but the acting user
+ * stays signed in.
+ */
+export async function destroyOtherSessions(userId: string, keepRawToken: string): Promise<void> {
+  await db
+    .delete(sessions)
+    .where(and(eq(sessions.userId, userId), sql`sessions.token_hash <> ${hashToken(keepRawToken)}`));
 }

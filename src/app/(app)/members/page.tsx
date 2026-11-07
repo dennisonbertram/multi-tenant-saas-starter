@@ -2,7 +2,7 @@ import { and, desc, eq, isNull } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { invitations, memberships, users } from "@/lib/db/schema";
 import { requireOrg } from "@/lib/tenancy";
-import { changeMemberRoleAction, removeMemberAction, revokeInvitationAction } from "../actions";
+import { changeMemberRoleAction, removeMemberAction, resendInvitationAction, revokeInvitationAction } from "../actions";
 import { RoleSelect } from "../role-select";
 import { ConfirmSubmit } from "@/components/confirm-button";
 import { Alert, Button, Card } from "@/components/ui";
@@ -100,12 +100,20 @@ export default async function MembersPage() {
                     <span className="text-sm">
                       {i.email} · {i.role}
                     </span>
-                    <form action={revokeInvitationAction}>
-                      <input type="hidden" name="invitationId" value={i.id} />
-                      <Button variant="secondary" className="px-3 py-1.5 text-xs">
-                        Revoke
-                      </Button>
-                    </form>
+                    <div className="flex items-center gap-2">
+                      <form action={resendInvitationAction}>
+                        <input type="hidden" name="invitationId" value={i.id} />
+                        <Button variant="secondary" className="px-3 py-1.5 text-xs">
+                          Resend
+                        </Button>
+                      </form>
+                      <form action={revokeInvitationAction}>
+                        <input type="hidden" name="invitationId" value={i.id} />
+                        <Button variant="secondary" className="px-3 py-1.5 text-xs">
+                          Revoke
+                        </Button>
+                      </form>
+                    </div>
                   </li>
                 ))}
               </ul>

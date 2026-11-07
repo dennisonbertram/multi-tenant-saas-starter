@@ -48,7 +48,11 @@ server console; copy the link from there.
 - **Example tenant-scoped resource**: the `projects` table + `/projects` page
   + `/api/v1/projects` endpoint demonstrate the full pattern end to end.
   Delete them when you add your real domain.
-- **Audit log**: security-relevant events recorded per org (`audit_log` table).
+- **Audit log**: security-relevant events recorded per org (`audit_log` table)
+  and viewable by owners/admins at `/audit`.
+- **Account settings**: change your own name, password (signs out other
+  devices) and email (re-verified via a link to the new address) at
+  `/settings/account`.
 - **Health endpoint**: `GET /api/health` for uptime monitors/load balancers.
 - **Deployment**: Dockerfile, docker-compose (app + Postgres + Caddy with
   automatic HTTPS), systemd unit, nightly backup script.
