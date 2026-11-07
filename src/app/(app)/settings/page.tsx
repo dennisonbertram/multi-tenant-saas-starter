@@ -1,7 +1,7 @@
 import { requireRole } from "@/lib/tenancy";
 import { createOrgAction } from "../actions";
 import { Card } from "@/components/ui";
-import { CreateOrgForm, RenameOrgForm } from "../forms";
+import { CreateOrgForm, DeleteOrgForm, RenameOrgForm } from "../forms";
 
 export const metadata = { title: "Settings" };
 
@@ -21,6 +21,13 @@ export default async function SettingsPage() {
         description="You become its owner and switch to it immediately."
       >
         <CreateOrgForm />
+      </Card>
+
+      <Card
+        title="Danger zone"
+        description="Deletes this organization, all its projects, members, invitations and audit history. This cannot be undone."
+      >
+        <DeleteOrgForm orgName={org.name} />
       </Card>
     </div>
   );

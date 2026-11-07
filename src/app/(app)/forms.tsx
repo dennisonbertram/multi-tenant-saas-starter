@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 import {
   changePasswordAction,
   createOrgAction,
+  deleteOrgAction,
   createProjectAction,
   inviteMemberAction,
   requestEmailChangeAction,
@@ -66,6 +67,32 @@ export function InviteMemberForm({ canInviteAdmins }: { canInviteAdmins: boolean
       </Field>
       <Button type="submit" disabled={pending}>
         {pending ? "Sending…" : "Send invitation"}
+      </Button>
+    </form>
+  );
+}
+
+export function DeleteOrgForm({ orgName }: { orgName: string }) {
+  const [state, formAction, pending] = useActionState(deleteOrgAction, initial);
+  const [value, setValue] = useState("");
+  const matches = value === orgName;
+  return (
+    <form action={formAction} className="space-y-3">
+      {state.error ? <Alert kind="error">{state.error}</Alert> : null}
+      <Field
+        label={`Type "${orgName}" to confirm`}
+        error={state.fieldErrors?.confirmName}
+      >
+        <Input
+          name="confirmName"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          autoComplete="off"
+          required
+        />
+      </Field>
+      <Button type="submit" variant="danger" disabled={pending || !matches}>
+        {pending ? "Deleting…" : "Delete organization forever"}
       </Button>
     </form>
   );

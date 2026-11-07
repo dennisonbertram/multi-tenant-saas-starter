@@ -95,3 +95,16 @@ Section: dashboard. Reviewed post-shadcn/post-sidebar.
 - Rejected: relative timestamps (absolute UTC is correct for forensics).
 - Deferred: action/actor filters — the page is an example teams replace;
   noted for template users in docs/MULTI-TENANCY.md later if wanted.
+
+## Round 13 — Org lifecycle (2025-XX-XX)
+New features (user-requested direction: "make better features"):
+- **Leave organization:** self-service exit on your own row in /members
+  (two-step confirm). Server guard: last owner cannot leave — redirects to
+  /members?error=last-owner with a clear alert. Verified live: member left
+  Acme Holdings → landed on dashboard under their remaining org; last-owner
+  attempt blocked, membership intact.
+- **Delete organization:** owner-only "Danger zone" card on /settings.
+  Requires typing the org name exactly (button disabled until match,
+  server re-validates with a zod literal). Cascades to memberships,
+  invitations, projects, audit rows; active-org cookie cleared; lands on
+  remaining org or /no-org. Verified live with a throwaway org.

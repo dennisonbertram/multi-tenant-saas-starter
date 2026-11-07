@@ -2,7 +2,7 @@ import { and, desc, eq, isNull } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { invitations, memberships, users } from "@/lib/db/schema";
 import { requireOrg } from "@/lib/tenancy";
-import { changeMemberRoleAction, removeMemberAction, resendInvitationAction, revokeInvitationAction } from "../actions";
+import { changeMemberRoleAction, removeMemberAction, resendInvitationAction, revokeInvitationAction, leaveOrgAction } from "../actions";
 import { RoleSelect } from "../role-select";
 import { ConfirmSubmit } from "@/components/confirm-button";
 import { Alert, Badge, Button, Card } from "@/components/ui";
@@ -10,8 +10,13 @@ import { InviteMemberForm } from "../forms";
 
 export const metadata = { title: "Members" };
 
-export default async function MembersPage() {
+export default async function MembersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
   const { user, org } = await requireOrg();
+  const params = await searchParams;
   const isAdmin = org.role === "admin" || org.role === "owner";
 
   const members = await db
@@ -61,6 +66,12 @@ export default async function MembersPage() {
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold">Members of {org.name}</h1>
 
+      {params.error === "last-owner" ? (
+        <Alert kind="error">
+          You are the last owner — transfer ownership to someone else before leaving.
+        </Alert>
+      ) : null}
+
       <Card title="Team">
         <ul className="divide-y divide-border">
           {members.map((m) => (
@@ -85,6 +96,11 @@ export default async function MembersPage() {
                   <form action={removeMemberAction}>
                     <input type="hidden" name="membershipId" value={m.membershipId} />
                     <ConfirmSubmit confirmLabel="Confirm remove?">Remove</ConfirmSubmit>
+                  </form>
+                ) : null}
+                {m.userId === user.id ? (
+                  <form action={leaveOrgAction}>
+                    <ConfirmSubmit confirmLabel="Confirm leave?">Leave</ConfirmSubmit>
                   </form>
                 ) : null}
               </div>

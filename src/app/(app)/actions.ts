@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { and, desc, eq, sql } from "drizzle-orm";
@@ -18,6 +19,7 @@ import { env } from "@/lib/env";
 import {
   ACTIVE_ORG_COOKIE,
   hasRole,
+  listUserOrganizations,
   requireOrg,
   requireRole,
   verifyMembership,
@@ -434,4 +436,59 @@ export async function resendInvitationAction(formData: FormData): Promise<void> 
     ipAddress: clientIp(await headers()),
   });
   revalidatePath("/members");
+}
+
+// ── Organization lifecycle: leave / delete ──────────────────────────────────
+
+/**
+ * Self-service exit. Members can always leave; owners can leave only when
+ * another owner remains (same last-owner guard as removal). Afterwards the
+ * user lands on their remaining org, or /no-org if this was their only one.
+ */
+export async function leaveOrgAction(formData: FormData): Promise<void> {
+  const { user, org } = await requireOrg();
+
+  if (org.role === "owner") {
+    const [{ count }] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(memberships)
+      .where(and(eq(memberships.organizationId, org.id), eq(memberships.role, "owner")));
+    if (count <= 1) redirect("/members?error=last-owner");
+  }
+
+  await db
+    .delete(memberships)
+    .where(and(eq(memberships.organizationId, org.id), eq(memberships.userId, user.id)));
+  await audit({
+    userId: user.id,
+    organizationId: org.id,
+    action: "member.left",
+    metadata: { email: user.email },
+  });
+
+  const cookieStore = await cookies();
+  cookieStore.delete(ACTIVE_ORG_COOKIE);
+  redirect("/dashboard");
+}
+
+/**
+ * Owner-only, irreversible. Requires typing the organization name exactly.
+ * Cascades to memberships, invitations, projects and this org's audit rows.
+ */
+export async function deleteOrgAction(_prev: FormState, formData: FormData): Promise<FormState> {
+  const { user, org } = await requireRole("owner");
+
+  const parsed = z
+    .object({ confirmName: z.literal(org.name, { message: "Type the organization name exactly." }) })
+    .safeParse({ confirmName: formData.get("confirmName") });
+  if (!parsed.success) {
+    return { error: `Type "${org.name}" exactly to confirm deletion.` };
+  }
+
+  await db.delete(organizations).where(eq(organizations.id, org.id));
+  const cookieStore = await cookies();
+  cookieStore.delete(ACTIVE_ORG_COOKIE);
+
+  const remaining = await listUserOrganizations(user.id);
+  redirect(remaining.length > 0 ? "/dashboard" : "/no-org");
 }
