@@ -1,0 +1,20 @@
+# Reverse proxy with automatic HTTPS (Let's Encrypt).
+# APP_DOMAIN is injected by docker-compose. For bare-metal Caddy (no Docker),
+# replace {$APP_DOMAIN} with your domain and keep the rest identical.
+
+{$APP_DOMAIN} {
+	encode gzip
+
+	# Security headers (complements the app's own headers)
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+
+	reverse_proxy app:3000 {
+		header_up X-Real-IP {remote_host}
+	}
+}

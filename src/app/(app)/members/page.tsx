@@ -1,0 +1,115 @@
+import { and, desc, eq, isNull } from "drizzle-orm";
+import { db } from "@/lib/db";
+import { invitations, memberships, users } from "@/lib/db/schema";
+import { requireOrg } from "@/lib/tenancy";
+import { removeMemberAction, revokeInvitationAction } from "../actions";
+import { Alert, Button, Card } from "@/components/ui";
+import { InviteMemberForm } from "../forms";
+
+export const metadata = { title: "Members" };
+
+export default async function MembersPage() {
+  const { user, org } = await requireOrg();
+  const isAdmin = org.role === "admin" || org.role === "owner";
+
+  const members = await db
+    .select({
+      membershipId: memberships.id,
+      userId: users.id,
+      email: users.email,
+      name: users.name,
+      role: memberships.role,
+      joinedAt: memberships.createdAt,
+    })
+    .from(memberships)
+    .innerJoin(users, eq(users.id, memberships.userId))
+    .where(eq(memberships.organizationId, org.id))
+    .orderBy(desc(memberships.createdAt));
+
+  const pendingInvites = isAdmin
+    ? await db
+        .select({
+          id: invitations.id,
+          email: invitations.email,
+          role: invitations.role,
+          expiresAt: invitations.expiresAt,
+        })
+        .from(invitations)
+        .where(
+          and(
+            eq(invitations.organizationId, org.id),
+            isNull(invitations.acceptedAt),
+            isNull(invitations.revokedAt),
+          ),
+        )
+    : [];
+
+  const visibleInvites = pendingInvites.filter((i) => i.expiresAt > new Date());
+
+  return (
+    <div className="space-y-6">
+      <h1 className="text-2xl font-semibold">Members of {org.name}</h1>
+
+      <Card title="Team">
+        <ul className="divide-y divide-[var(--border)]">
+          {members.map((m) => (
+            <li key={m.membershipId} className="flex items-center justify-between gap-4 py-3">
+              <div>
+                <p className="text-sm font-medium">
+                  {m.name ?? m.email} {m.userId === user.id ? <span className="text-xs text-[var(--muted)]">(you)</span> : null}
+                </p>
+                <p className="text-xs text-[var(--muted)]">
+                  {m.email} · {m.role}
+                </p>
+              </div>
+              {isAdmin && m.userId !== user.id ? (
+                <form action={removeMemberAction}>
+                  <input type="hidden" name="membershipId" value={m.membershipId} />
+                  <Button variant="danger" className="px-3 py-1.5 text-xs">
+                    Remove
+                  </Button>
+                </form>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+        <p className="mt-3 text-xs text-[var(--muted)]">
+          Role changes (owner-only) are done via the API or a management script in this
+          starter — extend the members page with a role selector if you need it in the UI.
+        </p>
+      </Card>
+
+      {isAdmin ? (
+        <>
+          <Card title="Pending invitations">
+            {visibleInvites.length === 0 ? (
+              <p className="text-sm text-[var(--muted)]">No pending invitations.</p>
+            ) : (
+              <ul className="divide-y divide-[var(--border)]">
+                {visibleInvites.map((i) => (
+                  <li key={i.id} className="flex items-center justify-between gap-4 py-2">
+                    <span className="text-sm">
+                      {i.email} · {i.role}
+                    </span>
+                    <form action={revokeInvitationAction}>
+                      <input type="hidden" name="invitationId" value={i.id} />
+                      <Button variant="secondary" className="px-3 py-1.5 text-xs">
+                        Revoke
+                      </Button>
+                    </form>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Card>
+
+          <Card title="Invite someone" description="They receive an email with a 7-day invitation link.">
+            <InviteMemberForm canInviteAdmins={org.role === "owner"} />
+          </Card>
+        </>
+      ) : (
+        <Alert kind="info">Only admins and owners can manage members.</Alert>
+      )}
+    </div>
+  );
+}

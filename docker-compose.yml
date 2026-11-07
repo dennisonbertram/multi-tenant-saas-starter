@@ -1,0 +1,75 @@
+# Full local/dev/self-hosted stack: app + PostgreSQL + Caddy (TLS reverse proxy).
+#   cp .env.example .env   # edit values
+#   docker compose up -d --build
+#
+# Caddy obtains and renews Let's Encrypt certificates automatically for
+# APP_DOMAIN. For local dev without a domain, set APP_DOMAIN=localhost and
+# open http://localhost:3000 directly (Caddy still proxies it).
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-saas}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-saas}
+      POSTGRES_DB: ${POSTGRES_DB:-saas_starter}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-saas}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # One-shot migration runner using the full build (has tsx + drizzle-kit).
+  migrate:
+    build:
+      context: .
+      target: builder
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-saas}:${POSTGRES_PASSWORD:-saas}@db:5432/${POSTGRES_DB:-saas_starter}
+    command: npx tsx src/scripts/migrate.ts
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-saas}:${POSTGRES_PASSWORD:-saas}@db:5432/${POSTGRES_DB:-saas_starter}
+      APP_URL: ${APP_URL:-http://localhost:3000}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      EMAIL_FROM: ${EMAIL_FROM:-SaaS Starter <no-reply@example.com>}
+      NODE_ENV: production
+    command: node server.js
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      APP_DOMAIN: ${APP_DOMAIN:-localhost}
+    volumes:
+      - ./deploy/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:

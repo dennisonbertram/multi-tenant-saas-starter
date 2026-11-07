@@ -1,0 +1,10 @@
+node_modules
+.next
+.git
+.env
+.env.local
+.pgdata
+backups
+docs
+*.md
+npm-debug.log*
