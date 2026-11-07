@@ -75,7 +75,9 @@ export async function requireOrg(): Promise<{ user: SessionUser; org: ActiveOrg 
   const user = await getCurrentUser();
   if (!user) redirect("/login");
   const org = await getActiveOrg(user);
-  if (!org) redirect("/login");
+  // /no-org, not /login: bouncing org-less users to the login form caused an
+  // invisible lockout loop (walkthrough finding F-021-001).
+  if (!org) redirect("/no-org");
   return { user, org };
 }
 
