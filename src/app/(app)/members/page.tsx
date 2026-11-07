@@ -35,6 +35,10 @@ export default async function MembersPage() {
           expiresAt: invitations.expiresAt,
         })
         .from(invitations)
+        // Newest first: a deterministic order so admins revoke the row they
+        // are looking at (unordered list caused revoking the wrong invite
+        // during walkthrough STORY-019).
+        .orderBy(desc(invitations.createdAt))
         .where(
           and(
             eq(invitations.organizationId, org.id),
