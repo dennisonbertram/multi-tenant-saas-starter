@@ -1,70 +1,36 @@
-import Link from "next/link";
 import { requireOrg, listUserOrganizations } from "@/lib/tenancy";
-import { logoutAction } from "../(auth)/actions";
 import { switchOrgAction } from "./actions";
-import { OrgSwitchSelect } from "./org-switch-select";
+import { AppSidebar } from "./app-sidebar";
 import { VerifyEmailBanner } from "./verify-banner";
-import { Button } from "@/components/ui";
+import { SidebarInset, SidebarProvider, SidebarTrigger, Separator } from "@/components/ui";
 
 /**
- * Authenticated shell. requireOrg() is the single authorization gate:
- * nothing under this layout renders without a valid session + org.
+ * Authenticated shell — classic two-column dashboard: fixed sidebar on the
+ * left (nav, org switcher, user), content column on the right. requireOrg()
+ * is the single authorization gate: nothing under this layout renders
+ * without a valid session + org. On mobile the sidebar collapses into a
+ * sheet; SidebarTrigger toggles it.
  */
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, org } = await requireOrg();
   const orgs = await listUserOrganizations(user.id);
 
   return (
-    <div className="min-h-screen">
-      <header className="border-b border-border bg-white">
-        <div className="mx-auto flex max-w-5xl items-center gap-4 px-6 py-3">
-          <Link href="/dashboard" className="font-semibold">
-            SaaS Starter
-          </Link>
-
-          <nav className="flex gap-1 text-sm">
-            <Link href="/dashboard" className="rounded-md px-3 py-1.5 hover:bg-slate-100">
-              Dashboard
-            </Link>
-            <Link href="/projects" className="rounded-md px-3 py-1.5 hover:bg-slate-100">
-              Projects
-            </Link>
-            <Link href="/members" className="rounded-md px-3 py-1.5 hover:bg-slate-100">
-              Members
-            </Link>
-            {org.role !== "member" ? (
-              <Link href="/settings" className="rounded-md px-3 py-1.5 hover:bg-slate-100">
-                Settings
-              </Link>
-            ) : null}
-            {org.role !== "member" ? (
-              <Link href="/audit" className="rounded-md px-3 py-1.5 hover:bg-slate-100">
-                Audit
-              </Link>
-            ) : null}
-            <Link href="/settings/account" className="rounded-md px-3 py-1.5 hover:bg-slate-100">
-              Account
-            </Link>
-          </nav>
-
-          <div className="ml-auto flex items-center gap-3">
-            {orgs.length > 1 ? (
-              <OrgSwitchSelect organizations={orgs} currentOrgId={org.id} action={switchOrgAction} />
-            ) : (
-              <span className="text-sm font-medium text-muted-foreground">{org.name}</span>
-            )}
-            <form action={logoutAction}>
-              <Button variant="secondary" size="sm">
-                Sign out
-              </Button>
-            </form>
-          </div>
-        </div>
-      </header>
-
-      <VerifyEmailBanner verified={Boolean(user.emailVerifiedAt)} />
-
-      <main className="mx-auto max-w-5xl px-6 py-8">{children}</main>
-    </div>
+    <SidebarProvider>
+      <AppSidebar
+        user={{ name: user.name, email: user.email }}
+        org={{ id: org.id, name: org.name, role: org.role }}
+        orgs={orgs}
+        switchAction={switchOrgAction}
+      />
+      <SidebarInset>
+        <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
+          <SidebarTrigger />
+          <span className="text-sm font-semibold">{org.name}</span>
+        </header>
+        <VerifyEmailBanner verified={Boolean(user.emailVerifiedAt)} />
+        <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-8">{children}</main>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }

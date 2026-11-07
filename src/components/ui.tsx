@@ -192,3 +192,25 @@ export {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
+// ── Sidebar (shadcn) ── app-shell two-column layout ─────────────────────────
+
+export {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarInset,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarSeparator,
+  SidebarTrigger,
+  useSidebar,
+} from "@/components/ui/sidebar";
+
+export { Separator } from "@/components/ui/separator";
