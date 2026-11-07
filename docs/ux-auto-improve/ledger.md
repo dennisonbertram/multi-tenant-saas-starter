@@ -86,3 +86,12 @@ Section: dashboard. Reviewed post-shadcn/post-sidebar.
   though rename sits above it. autoFocus is now a prop; only the no-org
   page (where the form is the sole content) passes it.
 - Deferred: delete-organization danger zone → R8 (org lifecycle).
+
+## Round 12 — Audit log (2025-XX-XX)
+- **Fixed — actor names:** actorName was selected but never rendered; rows
+  now show "Name (email)".
+- **Fixed — raw JSON metadata:** metadata rendered as JSON.stringify blob;
+  now "key: value · key: value".
+- Rejected: relative timestamps (absolute UTC is correct for forensics).
+- Deferred: action/actor filters — the page is an example teams replace;
+  noted for template users in docs/MULTI-TENANCY.md later if wanted.

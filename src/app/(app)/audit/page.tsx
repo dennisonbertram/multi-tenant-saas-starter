@@ -17,6 +17,14 @@ function formatWhen(d: Date): string {
   return d.toISOString().replace("T", " ").slice(0, 16) + " UTC";
 }
 
+/** Human-readable metadata: {"name":"x","role":"admin"} → name: x · role: admin */
+function formatMetadata(metadata: Record<string, unknown> | null): string {
+  if (!metadata) return "";
+  return Object.entries(metadata)
+    .map(([k, v]) => `${k}: ${String(v)}`)
+    .join(" · ");
+}
+
 /**
  * Read-only audit trail for the active organization. Owner/admin only
  * (requireRole). The audit log is forensic evidence, not authorization —
@@ -55,10 +63,19 @@ export default async function AuditPage({
                   <TableCell className="whitespace-nowrap text-muted-foreground">
                     {formatWhen(e.createdAt)}
                   </TableCell>
-                  <TableCell>{e.actorEmail ?? "—"}</TableCell>
+                  <TableCell>
+                    {e.actorName ? (
+                      <span>
+                        {e.actorName}
+                        <span className="text-muted-foreground"> ({e.actorEmail})</span>
+                      </span>
+                    ) : (
+                      (e.actorEmail ?? "—")
+                    )}
+                  </TableCell>
                   <TableCell className="font-mono">{e.action}</TableCell>
                   <TableCell className="text-muted-foreground">
-                    {e.metadata ? JSON.stringify(e.metadata) : "—"}
+                    {formatMetadata(e.metadata) || "—"}
                     {e.ipAddress ? ` · ${e.ipAddress}` : ""}
                   </TableCell>
                 </TableRow>
