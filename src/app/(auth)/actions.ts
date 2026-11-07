@@ -113,7 +113,10 @@ export async function loginAction(_prev: FormState, formData: FormData): Promise
   });
   await audit({ userId: user.id, action: "user.login" });
 
-  redirect(formData.get("next")?.toString() ?? "/dashboard");
+  // Only redirect to a same-app relative path; an empty hidden field must
+  // fall back to the dashboard (redirect("") crashes with Invalid URL).
+  const next = formData.get("next")?.toString();
+  redirect(next && next.startsWith("/") ? next : "/dashboard");
 }
 
 // ── Logout ──────────────────────────────────────────────────────────────────
