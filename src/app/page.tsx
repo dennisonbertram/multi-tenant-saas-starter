@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth/session";
 import { ButtonLink } from "@/components/ui";
 
@@ -16,12 +15,7 @@ export default async function LandingPage() {
       </p>
       <div className="flex gap-3">
         {user ? (
-          <Link
-            href="/dashboard"
-            className="rounded-md bg-primary px-5 py-2.5 text-sm font-medium text-white hover:bg-primary/90"
-          >
-            Go to dashboard
-          </Link>
+          <ButtonLink href="/dashboard">Go to dashboard</ButtonLink>
         ) : (
           <>
             <ButtonLink href="/signup">Create an account</ButtonLink>
@@ -31,7 +25,7 @@ export default async function LandingPage() {
           </>
         )}
       </div>
-      <p className="text-xs text-slate-400">
+      <p className="text-xs text-muted-foreground">
         Read the docs in <code>docs/</code> — start with README.md
       </p>
     </main>

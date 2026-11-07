@@ -40,9 +40,7 @@ export function ConfirmSubmit({
       onClick={onClick}
       onMouseLeave={() => setArmed(false)}
       className={`${
-        armed
-          ? "inline-flex items-center justify-center rounded-lg bg-destructive px-3 py-1.5 text-xs font-medium text-white hover:bg-destructive/90"
-          : buttonStyles("secondary")
+        armed ? buttonStyles("danger") : buttonStyles("secondary")
       } !h-auto ${className}`}
       {...props}
     >

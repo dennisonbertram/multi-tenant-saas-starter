@@ -108,3 +108,16 @@ New features (user-requested direction: "make better features"):
   server re-validates with a zod literal). Cascades to memberships,
   invitations, projects, audit rows; active-org cookie cleared; lands on
   remaining org or /no-org. Verified live with a throwaway org.
+
+## Round 14 — Public surfaces + token hygiene (2025-XX-XX)
+- **Fixed — design-system violations on public pages:** landing's signed-in
+  CTA hand-rolled button styles (now ButtonLink); text-slate-400/bg-white/
+  bg-slate-50 replaced with tokens (text-muted-foreground/bg-card/bg-muted/50).
+  grep now clean: zero hardcoded palette classes outside ui/.
+- **Fixed — off-system armed state:** ConfirmSubmit's armed style was
+  hand-rolled solid red; now buttonStyles("danger") — matches the system's
+  destructive buttons exactly (Nova style is soft-destructive by design).
+- **Fixed — stale copy:** landing no longer claims "dependency-free"
+  (shadcn/Radix are deps now).
+- Regression: two-step delete still works end-to-end (armed → confirm →
+  row gone from DB).

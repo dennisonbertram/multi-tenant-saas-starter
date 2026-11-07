@@ -18,7 +18,7 @@ export function InviteSignupForm({ token, email }: { token: string; email: strin
         <Input name="name" autoComplete="name" required autoFocus />
       </Field>
       <Field label="Email" error={state.fieldErrors?.email}>
-        <Input name="email" type="email" defaultValue={email} readOnly className="bg-slate-50" />
+        <Input name="email" type="email" defaultValue={email} readOnly className="bg-muted/50" />
       </Field>
       <Field label="Choose a password" error={state.fieldErrors?.password}>
         <PasswordInput name="password" autoComplete="new-password" required minLength={10} />
